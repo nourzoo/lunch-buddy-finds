@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,9 +17,10 @@ interface User {
 
 interface MatchingSystemProps {
   preferences: any;
+  matchingMode: 'solo' | 'select' | 'random';
 }
 
-const MatchingSystem = ({ preferences }: MatchingSystemProps) => {
+const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [matchedUser, setMatchedUser] = useState<User | null>(null);
   const [matchingStatus, setMatchingStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
@@ -65,13 +65,13 @@ const MatchingSystem = ({ preferences }: MatchingSystemProps) => {
   ];
 
   useEffect(() => {
-    if (!preferences.soloMode) {
+    if (matchingMode !== 'solo') {
       setAvailableUsers(mockUsers);
     } else {
       setAvailableUsers([]);
       setMatchedUser(null);
     }
-  }, [preferences.soloMode]);
+  }, [matchingMode]);
 
   const startRandomMatching = () => {
     setMatchingStatus('searching');
@@ -92,11 +92,11 @@ const MatchingSystem = ({ preferences }: MatchingSystemProps) => {
     setMatchingStatus('idle');
   };
 
-  if (preferences.soloMode) {
+  if (matchingMode === 'solo') {
     return (
       <Card className="animate-fade-in">
         <CardContent className="p-8 text-center">
-          <div className="text-6xl mb-4">🧘‍♂️</div>
+          <div className="text-6xl mb-4">🧘‍♀️</div>
           <h3 className="text-xl font-semibold mb-2">혼밥 모드</h3>
           <p className="text-gray-600">
             조용하고 편안한 혼밥 타임을 즐기세요.<br />
@@ -160,75 +160,82 @@ const MatchingSystem = ({ preferences }: MatchingSystemProps) => {
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
               점심 메이트 찾기
+              {matchingMode === 'random' && <Badge variant="secondary">랜덤 매칭</Badge>}
+              {matchingMode === 'select' && <Badge variant="secondary">직접 선택</Badge>}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center mb-6">
-              <Button 
-                onClick={startRandomMatching}
-                disabled={matchingStatus === 'searching'}
-                className="gradient-orange text-white hover:opacity-90 transition-opacity"
-              >
-                {matchingStatus === 'searching' ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    매칭 중...
-                  </>
-                ) : (
-                  <>
-                    <Shuffle className="h-4 w-4 mr-2" />
-                    랜덤 매칭
-                  </>
-                )}
-              </Button>
-              <p className="text-sm text-gray-500 mt-2">
-                비슷한 점심시간을 가진 동료와 자동 매칭
-              </p>
-            </div>
+            {matchingMode === 'random' && (
+              <div className="text-center mb-6">
+                <Button 
+                  onClick={startRandomMatching}
+                  disabled={matchingStatus === 'searching'}
+                  className="gradient-orange text-white hover:opacity-90 transition-opacity"
+                >
+                  {matchingStatus === 'searching' ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      매칭 중...
+                    </>
+                  ) : (
+                    <>
+                      <Shuffle className="h-4 w-4 mr-2" />
+                      랜덤 매칭 시작
+                    </>
+                  )}
+                </Button>
+                <p className="text-sm text-gray-500 mt-2">
+                  비슷한 점심시간을 가진 동료와 자동 매칭
+                </p>
+              </div>
+            )}
 
-            <div className="border-t pt-6">
-              <h4 className="font-medium mb-4">직접 선택하기</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {availableUsers.map((user) => (
-                  <div 
-                    key={user.id}
-                    className="p-4 border rounded-lg cursor-pointer hover:border-primary transition-colors hover-lift"
-                    onClick={() => selectUser(user)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <Avatar>
-                        <AvatarFallback className="text-lg">
-                          {user.avatar}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h5 className="font-medium truncate">{user.name}</h5>
-                        <p className="text-sm text-gray-600">{user.role}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Clock className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-500">{user.lunchTime}</span>
+            {(matchingMode === 'select' || matchingMode === 'random') && (
+              <div className={matchingMode === 'random' ? 'border-t pt-6' : ''}>
+                {matchingMode === 'random' && <h4 className="font-medium mb-4">또는 직접 선택하기</h4>}
+                {matchingMode === 'select' && <h4 className="font-medium mb-4">점심 메이트 선택</h4>}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {availableUsers.map((user) => (
+                    <div 
+                      key={user.id}
+                      className="p-4 border rounded-lg cursor-pointer hover:border-primary transition-colors hover-lift"
+                      onClick={() => selectUser(user)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Avatar>
+                          <AvatarFallback className="text-lg">
+                            {user.avatar}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <h5 className="font-medium truncate">{user.name}</h5>
+                          <p className="text-sm text-gray-600">{user.role}</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Clock className="h-3 w-3 text-gray-400" />
+                            <span className="text-xs text-gray-500">{user.lunchTime}</span>
+                          </div>
+                        </div>
+                        <Badge 
+                          variant={user.status === 'available' ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {user.status === 'available' ? '가능' : '식사중'}
+                        </Badge>
+                      </div>
+                      <div className="mt-3">
+                        <div className="flex flex-wrap gap-1">
+                          {user.interests.slice(0, 3).map((interest, i) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {interest}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
-                      <Badge 
-                        variant={user.status === 'available' ? 'default' : 'secondary'}
-                        className="text-xs"
-                      >
-                        {user.status === 'available' ? '가능' : '식사중'}
-                      </Badge>
                     </div>
-                    <div className="mt-3">
-                      <div className="flex flex-wrap gap-1">
-                        {user.interests.slice(0, 3).map((interest, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">
-                            {interest}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       )}

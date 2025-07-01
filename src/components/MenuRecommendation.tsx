@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, Clock, MapPin, Users, RefreshCw } from 'lucide-react';
+import { Star, Clock, MapPin, RefreshCw } from 'lucide-react';
 
 interface Restaurant {
   id: string;
@@ -21,12 +20,16 @@ interface Restaurant {
 
 interface MenuRecommendationProps {
   preferences: any;
+  weather?: {
+    condition: string;
+    temperature: number;
+    icon: string;
+  };
 }
 
-const MenuRecommendation = ({ preferences }: MenuRecommendationProps) => {
+const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(false);
-  const [weather] = useState('맑음');
 
   const mockRestaurants: Restaurant[] = [
     {
@@ -93,6 +96,19 @@ const MenuRecommendation = ({ preferences }: MenuRecommendationProps) => {
       image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400',
       isHealthy: true,
       description: '바쁜 직장인을 위한 간편하고 든든한 도시락'
+    },
+    {
+      id: '6',
+      name: '루프탑테라스',
+      category: '카페/브런치',
+      rating: 4.4,
+      walkTime: 6,
+      waitTime: 8,
+      price: '11,000원대',
+      tags: ['야외석', '뷰맛집', '인스타그램'],
+      image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400',
+      isHealthy: false,
+      description: '좋은 날씨에 야외에서 즐기는 브런치'
     }
   ];
 
@@ -104,8 +120,14 @@ const MenuRecommendation = ({ preferences }: MenuRecommendationProps) => {
     }
 
     // 날씨별 추천
-    if (weather === '비') {
+    if (weather?.condition === '비') {
       filtered = filtered.filter(r => r.walkTime <= 3);
+    } else if (weather?.condition === '맑음' && weather?.temperature > 20) {
+      // 좋은 날씨일 때 야외석 있는 곳도 추천
+      const outdoorRestaurants = filtered.filter(r => r.tags.includes('야외석'));
+      if (outdoorRestaurants.length > 0) {
+        filtered = [...filtered, ...outdoorRestaurants];
+      }
     }
 
     return filtered.slice(0, 3);
@@ -121,12 +143,12 @@ const MenuRecommendation = ({ preferences }: MenuRecommendationProps) => {
 
   useEffect(() => {
     loadRecommendations();
-  }, [preferences]);
+  }, [preferences, weather]);
 
   const getRecommendationReason = () => {
     const reasons = [];
     if (preferences.healthyOnly) reasons.push('건강식 우선');
-    if (weather === '맑음') reasons.push('좋은 날씨');
+    if (weather?.condition === '맑음') reasons.push('좋은 날씨');
     if (preferences.soloMode) reasons.push('혼밥 친화적');
     
     return reasons.length > 0 ? reasons.join(' + ') + ' 기준' : '종합 추천';
@@ -151,7 +173,7 @@ const MenuRecommendation = ({ preferences }: MenuRecommendationProps) => {
             </Button>
           </div>
           <div className="text-sm text-gray-600">
-            현재 날씨: {weather} ☀️ | 점심시간까지 30분 남음
+            현재 날씨: {weather?.condition} {weather?.icon} {weather?.temperature}°C | 점심시간까지 30분 남음
           </div>
         </CardHeader>
         <CardContent>
