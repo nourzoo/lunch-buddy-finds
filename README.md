@@ -1,73 +1,93 @@
-# Welcome to your Lovable project
+# 🥗 런치미 (LaunchMe)
 
-## Project info
+> “오늘 뭐 먹지?”, “누구랑 먹지?” 직장인의 점심 고민을 해결하는 큐레이션 & 매칭 서비스
 
-**URL**: https://lovable.dev/projects/7516d82a-1bbe-4d65-b766-0aa9073d14e1
+---
+## 🔗 배포 주소
 
-## How can I edit this code?
+- **웹 서비스**: [https://lunch-buddy-finds.lovable.app/](https://lunch-buddy-finds.lovable.app/)
 
-There are several ways of editing your application.
+## 📌 서비스 개요
 
-**Use Lovable**
+- **이름**: 런치미 (LaunchMe)
+- **목표**: 직장인의 점심시간 선택 스트레스를 줄이고, 메뉴 추천/동행자 매칭을 통해 만족도 높은 식사를 지원
+- **타겟**: 서울 지역 오피스 근무 직장인 (20대~40대 이상)
+- **핵심 가치**:
+    - 메뉴 고민 ↓
+    - 점심 네트워크 형성 ↑
+    - 루틴 기반 건강식 추천
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/7516d82a-1bbe-4d65-b766-0aa9073d14e1) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🧑‍💼 페르소나
 
-**Use your preferred IDE**
+| 연령대 | 이름 | 나이/성별 | 직업 | 목표 | 니즈 |
+|--------|------|------------|------|------|------|
+| 20–30대 | 최승연 | 27세, 여 | 주니어 개발자 | 밥 같이 먹을 사람 찾기<br>맨날 똑같은 메뉴 벗어나기 | 인기 메뉴 추천<br>밥약 매칭<br>회사 외 사람도 만나보고 싶음 |
+| 40대 이상 | 김재홍 | 45세, 남 | 중견기업 영업지원팀 팀장 | 조용한 점심시간<br>건강 루틴 유지 | 건강식 추천<br>단골 관리<br>혼밥 모드 설정 |
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🎬 사용자 시나리오 & 요구사항
 
-Follow these steps:
+### 👩 최승연 (20대 직장인)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+**🧩 시나리오**
+```
+승연이는 앱을 열고, 오늘의 인기 메뉴 TOP3와 ‘밥약 가능 3명’을 확인한다.  
+'같이 먹을 사람 찾기'를 눌러 같은 회사 마케터와 UX 디자이너와 매칭되고,  
+앱이 제안한 부대찌개집으로 이동해 식사한다.  
+식사 후 식당 리뷰 팝업이 떠서 평점을 남긴다.
 ```
 
-**Edit a file directly in GitHub**
+**📋 요구사항**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. 회사 근처 인기 메뉴 추천 기능
+2. 점심 동행자 매칭 기능
+3. 실시간 식당 대기 상태 확인
+4. 식당 리뷰/별점 작성 기능
+5. 사용자 간 기본 정보(닉네임/직군/회사명) 공개
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 👨 김재홍 (40대 직장인)
 
-## What technologies are used for this project?
+**🧩 시나리오**
+```
+재홍이는 앱을 켜서 '단골 식당 리스트'를 본다.  
+‘평양냉면’ 식당이 이번 주 두 번 방문했고, 오늘 대기 인원 3명임을 확인.  
+건강식 필터를 ‘나트륨 낮음’으로 설정하고,  
+‘혼밥 모드’를 켜 밥약 제안을 차단한 뒤 조용히 식사 장소로 출발.
+```
 
-This project is built with:
+**📋 요구사항**
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. 단골 식당 등록/즐겨찾기 기능
+2. 영양/건강 조건별 메뉴 필터링
+3. 실시간 대기 인원 조회 기능
+4. 혼밥 모드 설정 (매칭 비활성화)
+5. 식사 이력 기록 및 주간 리포트
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/7516d82a-1bbe-4d65-b766-0aa9073d14e1) and click on Share -> Publish.
+## 🔄 매칭 모드
 
-## Can I connect a custom domain to my Lovable project?
+| 모드 | 설명 | 대표 사용자 |
+|------|------|--------------|
+| 혼밥 모드 | 매칭 OFF, 추천만 받고 조용히 식사 | 김재홍 |
+| 지정 매칭 | 내가 원하는 사람에게 점심 제안 → 수락 시 매칭 | 팀원/동료와 밥약 |
+| 랜덤 매칭 | 큐 기반으로 비슷한 조건의 사람과 자동 매칭 | 신입/혼밥이 싫은 유저 |
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## ✨ 주요 기능 요약
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+| 분류 | 기능명 | 설명 |
+|------|--------|------|
+| 메뉴 추천 | 오늘의 인기 메뉴, 건강식 필터 | 위치 기반으로 인기 식당/메뉴 추천 |
+| 사람 매칭 | 동료/랜덤/지정 매칭 | 직군/회사/부서 기반으로 사람 추천 |
+| 대기 정보 | 실시간 식당 대기 인원 | 식당별 예상 대기시간 표시 |
+| 단골 관리 | 자주 가는 식당 등록 | 방문 횟수, 대기시간 빠른 순으로 정렬 |
+| 혼밥 모드 | 매칭 차단 | 오늘은 조용히 식사하고 싶은 사용자 모드 |
+| 후기 시스템 | 식당 리뷰/평점 작성 | 식사 후 간단한 별점과 코멘트 |
+| 식사 히스토리 | 식단 기록 | 주간 메뉴 통계, 건강 지표 제공 (옵션)
