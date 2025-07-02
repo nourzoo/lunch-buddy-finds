@@ -13,8 +13,19 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
     { name: '샐러드야', current: 5, peak: 15, status: '원활', lat: 37.5172, lng: 127.0473 },
     { name: '놀링파스타', current: 12, peak: 25, status: '보통', lat: 37.5180, lng: 127.0480 },
     { name: '푸근한한식집', current: 0, peak: 5, status: '원활', lat: 37.5165, lng: 127.0465 },
-    { name: '라멘이지만예', current: 18, peak: 30, status: '혼잡', lat: 37.5190, lng: 127.0490 },
-    { name: '지글지글', current: 2, peak: 8, status: '원활', lat: 37.5155, lng: 127.0455 }
+    { name: '라멘이지예', current: 18, peak: 30, status: '혼잡', lat: 37.5190, lng: 127.0490 },
+    { name: '지글지글', current: 2, peak: 8, status: '원활', lat: 37.5155, lng: 127.0455 },
+    { name: '다도한방카페', current: 8, peak: 20, status: '보통', lat: 37.5178, lng: 127.0478 },
+    { name: '시가집치킨', current: 20, peak: 40, status: '혼잡', lat: 37.5200, lng: 127.0500 },
+    { name: '초밥조바', current: 25, peak: 50, status: '혼잡', lat: 37.5210, lng: 127.0510 },
+    { name: '브라운피자', current: 15, peak: 35, status: '보통', lat: 37.5220, lng: 127.0520 },
+    { name: '뽕커리', current: 7, peak: 18, status: '원활', lat: 37.5230, lng: 127.0530 },
+    { name: '기괴떡볶이', current: 3, peak: 10, status: '원활', lat: 37.5240, lng: 127.0540 },
+    { name: '인백', current: 30, peak: 60, status: '혼잡', lat: 37.5250, lng: 127.0550 },
+    { name: '김밥지옥', current: 1, peak: 5, status: '원활', lat: 37.5260, lng: 127.0560 },
+    { name: '뿡차이', current: 10, peak: 25, status: '보통', lat: 37.5270, lng: 127.0570 },
+    { name: '카페인절제', current: 4, peak: 12, status: '원활', lat: 37.5280, lng: 127.0580 },
+    { name: '요거트 아이스크림의 교과서', current: 6, peak: 15, status: '보통', lat: 37.5290, lng: 127.0590 }
   ]);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [showMap, setShowMap] = useState(false);
@@ -25,7 +36,6 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
       alert('이 브라우저에서는 위치 서비스를 지원하지 않습니다.');
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -33,8 +43,19 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
         setShowMap(true);
       },
       (error) => {
-        console.error('위치 가져오기 실패:', error);
-        alert('위치를 가져올 수 없습니다. 기본 지도를 표시합니다.');
+        let message = '위치를 가져올 수 없습니다.';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = '위치 권한이 거부되었습니다.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = '위치 정보를 사용할 수 없습니다.';
+            break;
+          case error.TIMEOUT:
+            message = '위치 정보를 가져오는 데 시간이 초과되었습니다.';
+            break;
+        }
+        alert(message);
         setShowMap(true);
       }
     );

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -148,11 +147,13 @@ const Index = () => {
     }
   };
 
-  // 컴포넌트 마운트 시 위치 및 날씨 데이터 가져오기
+  // 컴포넌트 마운트 시 위치 한 번만 가져오기
   useEffect(() => {
     getUserLocation();
-    
-    // 30분마다 날씨 데이터 업데이트
+  }, []);
+
+  // 30분마다 날씨 데이터 업데이트
+  useEffect(() => {
     const interval = setInterval(() => {
       if (userLocation) {
         fetchWeather(userLocation.lat, userLocation.lng);
@@ -160,7 +161,6 @@ const Index = () => {
         fetchWeather();
       }
     }, 30 * 60 * 1000);
-    
     return () => clearInterval(interval);
   }, [userLocation]);
 
