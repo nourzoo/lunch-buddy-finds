@@ -24,6 +24,7 @@ interface MenuRecommendationProps {
     condition: string;
     temperature: number;
     icon: string;
+    description?: string;
   };
 }
 
@@ -40,7 +41,7 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
       walkTime: 3,
       waitTime: 5,
       price: '8,000원대',
-      tags: ['저칼로리', '신선함', '영양만점'],
+      tags: ['저칼로리', '신선함', '영양만점', '시원한음식', '가벼운음식'],
       image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400',
       isHealthy: true,
       description: '신선한 재료로 만든 건강한 샐러드와 저칼로리 메뉴'
@@ -66,7 +67,7 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
       walkTime: 2,
       waitTime: 0,
       price: '15,000원대',
-      tags: ['전통맛', '영양균형', '혼밥가능'],
+      tags: ['전통맛', '영양균형', '혼밥가능', '따뜻한국물'],
       image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400',
       isHealthy: true,
       description: '정통 한정식으로 영양 균형이 잘 잡힌 식사'
@@ -79,7 +80,7 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
       walkTime: 4,
       waitTime: 15,
       price: '9,000원대',
-      tags: ['진한국물', '대중적', '양많음'],
+      tags: ['진한국물', '대중적', '양많음', '따뜻한국물'],
       image: 'https://images.unsplash.com/photo-1557872943-16a5ac26437e?w=400',
       isHealthy: false,
       description: '진한 국물이 자랑인 정통 일본식 라멘'
@@ -105,7 +106,7 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
       walkTime: 6,
       waitTime: 8,
       price: '9,000원대',
-      tags: ['한방카페', '빙수맛집', '인스타그램'],
+      tags: ['한방카페', '빙수맛집', '인스타그램', '시원한음식', '야외석'],
       image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400',
       isHealthy: false,
       description: '한옥 냄새 나는 느낌 좋은 카페 빙수가 맛있어요'
@@ -119,15 +120,37 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
       filtered = filtered.filter(r => r.isHealthy);
     }
 
-    // 날씨별 추천
+    // 날씨별 추천 로직
     if (weather?.condition === '비') {
+      // 비올 때는 가까운 곳 우선
       filtered = filtered.filter(r => r.walkTime <= 3);
+      filtered.sort((a, b) => a.walkTime - b.walkTime);
+    } else if (weather?.condition === '눈') {
+      // 눈올 때는 따뜻한 국물 요리 우선
+      filtered = filtered.filter(r => 
+        r.category === '한정식' || 
+        r.category === '일식/라멘' || 
+        r.tags.includes('따뜻한국물')
+      );
+    } else if (weather?.condition === '더움') {
+      // 더울 때는 시원한 음식 우선
+      filtered = filtered.filter(r => 
+        r.category === '샐러드/건강식' || 
+        r.category === '카페' || 
+        r.tags.includes('시원한음식')
+      );
+    } else if (weather?.condition === '안개') {
+      // 안개가 끼면 가까운 곳 우선
+      filtered = filtered.filter(r => r.walkTime <= 4);
     } else if (weather?.condition === '맑음' && weather?.temperature > 20) {
-      // 좋은 날씨일 때 야외석 있는 곳도 추천
+      // 좋은 날씨일 때는 야외석 있는 곳도 추천
       const outdoorRestaurants = filtered.filter(r => r.tags.includes('야외석'));
       if (outdoorRestaurants.length > 0) {
         filtered = [...filtered, ...outdoorRestaurants];
       }
+    } else if (weather?.condition === '흐림') {
+      // 흐릴 때는 실내 식당 우선
+      filtered = filtered.filter(r => r.walkTime <= 5);
     }
 
     return filtered.slice(0, 3);
@@ -148,7 +171,15 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
   const getRecommendationReason = () => {
     const reasons = [];
     if (preferences.healthyOnly) reasons.push('건강식 우선');
+    
+    // 날씨별 추천 이유
     if (weather?.condition === '맑음') reasons.push('좋은 날씨');
+    else if (weather?.condition === '비') reasons.push('비 오는 날');
+    else if (weather?.condition === '눈') reasons.push('따뜻한 국물');
+    else if (weather?.condition === '더움') reasons.push('시원한 음식');
+    else if (weather?.condition === '안개') reasons.push('가까운 곳');
+    else if (weather?.condition === '흐림') reasons.push('실내 식당');
+    
     if (preferences.soloMode) reasons.push('혼밥 친화적');
     
     return reasons.length > 0 ? reasons.join(' + ') + ' 기준' : '종합 추천';
