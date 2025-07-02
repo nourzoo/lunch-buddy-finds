@@ -26,7 +26,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [matchedUsers, setMatchedUsers] = useState<User[]>([]);
   const [matchingStatus, setMatchingStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
-  const [maxGroupSize, setMaxGroupSize] = useState(4);
+  const [maxGroupSize, setMaxGroupSize] = useState(1);
   const [showGroupChat, setShowGroupChat] = useState(false);
 
   const mockUsers: User[] = [
@@ -127,8 +127,11 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
     if (matchedUsers.find(u => u.id === user.id)) {
       // 이미 선택된 사용자라면 제거
       setMatchedUsers(matchedUsers.filter(u => u.id !== user.id));
+      if (matchedUsers.length <= 1) {
+        setMatchingStatus('idle');
+      }
     } else {
-      // 새로운 사용자 추가 (최대 그룹 크기 제한)
+      // 새로운 사용자 추가 (그룹 크기 제한)
       if (matchedUsers.length < maxGroupSize) {
         setMatchedUsers([...matchedUsers, user]);
         setMatchingStatus('matched');
@@ -272,13 +275,20 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                 {matchingMode === 'select' && <h4 className="font-medium mb-4">점심 메이트 선택</h4>}
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm text-gray-600">그룹 크기: {matchedUsers.length}/{maxGroupSize}</p>
+                    <div>
+                      <p className="text-sm text-gray-600">그룹 크기: {matchedUsers.length}/{maxGroupSize}</p>
+                      {matchedUsers.length >= maxGroupSize && (
+                        <p className="text-xs text-orange-600 mt-1">
+                          최대 그룹 크기에 도달했습니다. 더 선택하려면 그룹 크기를 늘려주세요.
+                        </p>
+                      )}
+                    </div>
                     <div className="flex gap-2">
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => setMaxGroupSize(Math.max(2, maxGroupSize - 1))}
-                        disabled={maxGroupSize <= 2}
+                        onClick={() => setMaxGroupSize(Math.max(1, maxGroupSize - 1))}
+                        disabled={maxGroupSize <= 1}
                       >
                         -
                       </Button>
@@ -311,15 +321,18 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {availableUsers.map((user) => {
                     const isSelected = matchedUsers.find(u => u.id === user.id);
+                    const isDisabled = !isSelected && matchedUsers.length >= maxGroupSize;
                     return (
                       <div 
                         key={user.id}
-                        className={`p-4 border rounded-lg cursor-pointer transition-all hover-lift ${
+                        className={`p-4 border rounded-lg transition-all hover-lift ${
                           isSelected 
-                            ? 'border-primary bg-primary/5 shadow-md' 
-                            : 'hover:border-primary/50 hover:shadow-sm'
+                            ? 'border-primary bg-primary/5 shadow-md cursor-pointer' 
+                            : isDisabled
+                            ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+                            : 'hover:border-primary/50 hover:shadow-sm cursor-pointer'
                         }`}
-                        onClick={() => selectUser(user)}
+                        onClick={() => !isDisabled && selectUser(user)}
                       >
                         <div className="flex items-center space-x-3">
                           <Avatar>
@@ -344,6 +357,9 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                             </Badge>
                             {isSelected && (
                               <div className="text-primary text-xs font-medium">✓ 선택됨</div>
+                            )}
+                            {isDisabled && !isSelected && (
+                              <div className="text-gray-400 text-xs">그룹 가득참</div>
                             )}
                           </div>
                         </div>
