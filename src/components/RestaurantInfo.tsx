@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Users, MapPin, Phone, Navigation } from 'lucide-react';
-import GoogleMap from './GoogleMap';
 
 interface RestaurantInfoProps {
   selectedRestaurant?: string;
@@ -28,36 +27,6 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
     { name: '카페인절제', current: 4, peak: 12, status: '원활', lat: 37.5280, lng: 127.0580, rating: 4.1, category: '샌드위치', price: '7,000원대', waitTime: 4 },
     { name: '요거트 아이스크림의 교과서', current: 6, peak: 15, status: '보통', lat: 37.5290, lng: 127.0590, rating: 4.5, category: '디저트', price: '6,000원대', waitTime: 6 }
   ], []);
-  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
-
-  // 사용자 위치 가져오기
-  const getUserLocation = () => {
-    if (!navigator.geolocation) {
-      alert('이 브라우저에서는 위치 서비스를 지원하지 않습니다.');
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ lat: latitude, lng: longitude });
-      },
-      (error) => {
-        let message = '위치를 가져올 수 없습니다.';
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            message = '위치 권한이 거부되었습니다.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            message = '위치 정보를 사용할 수 없습니다.';
-            break;
-          case error.TIMEOUT:
-            message = '위치 정보를 가져오는 데 시간이 초과되었습니다.';
-            break;
-        }
-        alert(message);
-      }
-    );
-  };
 
   // 네비게이션 열기
   const openNavigation = (lat: number, lng: number) => {
@@ -97,14 +66,6 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
                 마지막 업데이트: 방금 전
               </p>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={getUserLocation}
-            >
-              <MapPin className="h-4 w-4 mr-2" />
-              내 위치 확인
-            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -172,11 +133,7 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
         </CardContent>
       </Card>
 
-      {/* 구글맵 컴포넌트 */}
-      <GoogleMap 
-        userLocation={userLocation}
-        restaurants={waitTimes}
-      />
+
     </div>
   );
 };
