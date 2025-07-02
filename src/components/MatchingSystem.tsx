@@ -130,6 +130,9 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       if (matchedUsers.length < maxGroupSize) {
         setMatchedUsers([...matchedUsers, user]);
         setMatchingStatus('matched');
+      } else {
+        // 그룹 크기 초과 시 알림
+        alert(`최대 ${maxGroupSize}명까지만 선택할 수 있습니다.`);
       }
     } else {
       // 체크박스가 해제된 경우 사용자 제거
@@ -371,11 +374,11 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                           <Checkbox
                             checked={!!isSelected}
                             onCheckedChange={(checked) => {
-                              if (!isDisabled && typeof checked === 'boolean') {
+                              if (typeof checked === 'boolean') {
                                 selectUser(user, checked);
                               }
                             }}
-                            disabled={isDisabled}
+                            disabled={false}
                           />
                           <Avatar>
                             <AvatarFallback className="text-lg">
