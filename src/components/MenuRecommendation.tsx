@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, Clock, MapPin, RefreshCw } from 'lucide-react';
+import { Star, Clock, MapPin, RefreshCw, Check, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Restaurant {
   id: string;
@@ -31,6 +32,8 @@ interface MenuRecommendationProps {
 const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
+  const { toast } = useToast();
 
   const mockRestaurants: Restaurant[] = [
     {
@@ -294,6 +297,30 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
     }, 1000);
   };
 
+  const handleSelectRestaurant = (restaurant: Restaurant) => {
+    setSelectedRestaurant(restaurant);
+    
+    toast({
+      title: "식당 선택 완료! 🎉",
+      description: `${restaurant.name}을(를) 선택하셨습니다. 맛있는 점심 되세요!`,
+      duration: 3000,
+    });
+
+    // 3초 후 선택 상태 초기화
+    setTimeout(() => {
+      setSelectedRestaurant(null);
+    }, 3000);
+  };
+
+  const handleCancelSelection = () => {
+    setSelectedRestaurant(null);
+    toast({
+      title: "선택 취소",
+      description: "식당 선택이 취소되었습니다.",
+      duration: 2000,
+    });
+  };
+
   useEffect(() => {
     loadRecommendations();
   }, [preferences, weather]);
@@ -317,6 +344,47 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* 선택된 식당 표시 */}
+      {selectedRestaurant && (
+        <Card className="border-primary bg-primary/5 animate-scale-in">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                  <Check className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedRestaurant.name}</h3>
+                  <p className="text-sm text-gray-600">{selectedRestaurant.description}</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleCancelSelection}
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  취소
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={() => {
+                    toast({
+                      title: "예약 완료! 📅",
+                      description: `${selectedRestaurant.name} 예약이 완료되었습니다.`,
+                      duration: 3000,
+                    });
+                  }}
+                >
+                  예약하기
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -350,61 +418,88 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {restaurants.map((restaurant, index) => (
-                <Card key={restaurant.id} className="hover-lift shadow-card hover:shadow-card-hover transition-all duration-300 animate-scale-in" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <div className="relative">
-                    <img 
-                      src={restaurant.image} 
-                      alt={restaurant.name}
-                      className="w-full h-32 object-cover rounded-t-lg"
-                    />
-                    {restaurant.isHealthy && (
-                      <Badge className="absolute top-2 right-2 bg-green-500">
-                        건강식
-                      </Badge>
-                    )}
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-lg">{restaurant.name}</h3>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm">{restaurant.rating}</span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-gray-600 mb-3">{restaurant.description}</p>
-                    
-                    <div className="space-y-2 mb-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-gray-500" />
-                          <span>도보 {restaurant.walkTime}분</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3 text-gray-500" />
-                          <span>대기 {restaurant.waitTime}분</span>
-                        </div>
-                      </div>
-                      <div className="text-sm font-medium text-primary">
-                        {restaurant.price}
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {restaurant.tags.map((tag, i) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {tag}
+              {restaurants.map((restaurant, index) => {
+                const isSelected = selectedRestaurant?.id === restaurant.id;
+                return (
+                  <Card 
+                    key={restaurant.id} 
+                    className={`hover-lift shadow-card hover:shadow-card-hover transition-all duration-300 animate-scale-in ${
+                      isSelected ? 'border-primary bg-primary/5' : ''
+                    }`} 
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className="relative">
+                      <img 
+                        src={restaurant.image} 
+                        alt={restaurant.name}
+                        className="w-full h-32 object-cover rounded-t-lg"
+                      />
+                      {restaurant.isHealthy && (
+                        <Badge className="absolute top-2 right-2 bg-green-500">
+                          건강식
                         </Badge>
-                      ))}
+                      )}
+                      {isSelected && (
+                        <div className="absolute top-2 left-2 bg-primary text-white rounded-full p-1">
+                          <Check className="h-4 w-4" />
+                        </div>
+                      )}
                     </div>
-                    
-                    <Button className="w-full" size="sm">
-                      선택하기
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold text-lg">{restaurant.name}</h3>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm">{restaurant.rating}</span>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-gray-600 mb-3">{restaurant.description}</p>
+                      
+                      <div className="space-y-2 mb-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-gray-500" />
+                            <span>도보 {restaurant.walkTime}분</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3 text-gray-500" />
+                            <span>대기 {restaurant.waitTime}분</span>
+                          </div>
+                        </div>
+                        <div className="text-sm font-medium text-primary">
+                          {restaurant.price}
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {restaurant.tags.map((tag, i) => (
+                          <Badge key={i} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      
+                      <Button 
+                        className="w-full" 
+                        size="sm"
+                        variant={isSelected ? "default" : "outline"}
+                        onClick={() => handleSelectRestaurant(restaurant)}
+                        disabled={selectedRestaurant && !isSelected}
+                      >
+                        {isSelected ? (
+                          <>
+                            <Check className="h-4 w-4 mr-2" />
+                            선택됨
+                          </>
+                        ) : (
+                          '선택하기'
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </CardContent>

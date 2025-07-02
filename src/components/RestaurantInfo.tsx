@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -87,13 +87,25 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
     <div className="space-y-6 animate-fade-in">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary" />
-            실시간 대기 정보
-          </CardTitle>
-          <p className="text-sm text-gray-600">
-            마지막 업데이트: 방금 전
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                실시간 대기 정보
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                마지막 업데이트: 방금 전
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={getUserLocation}
+            >
+              <MapPin className="h-4 w-4 mr-2" />
+              내 위치 확인
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
