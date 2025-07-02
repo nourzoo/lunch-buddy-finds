@@ -182,7 +182,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header setTab={setTab} />
+      <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 text-center">
@@ -246,7 +246,7 @@ const Index = () => {
         </div>
 
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
             <TabsTrigger value="recommendation" className="flex items-center gap-2">
               <Utensils className="h-4 w-4" />
               <span className="hidden sm:inline">추천</span>
@@ -305,7 +305,7 @@ const Index = () => {
 
           <TabsContent value="realtime" className="p-0">
             <div className="min-h-[600px] flex flex-col">
-              <RestaurantInfo />
+              <RestaurantInfo onClose={() => setTab('recommendation')} />
             </div>
           </TabsContent>
 

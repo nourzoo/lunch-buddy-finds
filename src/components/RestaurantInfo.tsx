@@ -6,9 +6,10 @@ import { Clock, Users, MapPin, Phone, Navigation } from 'lucide-react';
 
 interface RestaurantInfoProps {
   selectedRestaurant?: string;
+  onClose?: () => void;
 }
 
-const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
+const RestaurantInfo = ({ selectedRestaurant, onClose }: RestaurantInfoProps) => {
   const waitTimes = useMemo(() => [
     { name: '샐러드야', current: 5, peak: 15, status: '원활', lat: 37.5172, lng: 127.0473, rating: 4.5, category: '샐러드/건강식', price: '8,000원대', waitTime: 5 },
     { name: '놀링파스타', current: 12, peak: 25, status: '보통', lat: 37.5180, lng: 127.0480, rating: 4.3, category: '이탈리안', price: '12,000원대', waitTime: 12 },
@@ -53,7 +54,16 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in relative">
+      {onClose && (
+        <button
+          className="absolute right-4 top-4 z-10 text-gray-400 hover:text-primary text-2xl"
+          onClick={onClose}
+          aria-label="닫기"
+        >
+          ×
+        </button>
+      )}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -132,8 +142,6 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
           </div>
         </CardContent>
       </Card>
-
-
     </div>
   );
 };
