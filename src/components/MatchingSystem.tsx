@@ -28,38 +28,74 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   const mockUsers: User[] = [
     {
       id: '1',
-      name: '이민수',
-      role: '마케팅팀',
+      name: '오일남',
+      role: '개발팀',
       lunchTime: '12:00-13:00',
       interests: ['이탈리안', '샐러드/건강식', '카페'],
-      avatar: '🧑‍💼',
-      status: 'available'
-    },
-    {
-      id: '2',
-      name: '박지영',
-      role: '디자인팀',
-      lunchTime: '12:30-13:30',
-      interests: ['일식/라멘', '카페', '트렌디'],
-      avatar: '👩‍💻',
-      status: 'available'
-    },
-    {
-      id: '3',
-      name: '김철수',
-      role: '개발팀',
-      lunchTime: '11:30-12:30',
-      interests: ['한정식', '도시락/간편식', '혼밥'],
       avatar: '👨‍💻',
       status: 'available'
     },
     {
+      id: '2',
+      name: '오이남',
+      role: '디자인팀',
+      lunchTime: '12:30-13:30',
+      interests: ['일식/라멘', '카페', '트렌디'],
+      avatar: '👨‍🎨',
+      status: 'available'
+    },
+    {
+      id: '3',
+      name: '오삼남',
+      role: '마케팅팀',
+      lunchTime: '11:30-12:30',
+      interests: ['한정식', '도시락/간편식', '혼밥'],
+      avatar: '👨‍💼',
+      status: 'available'
+    },
+    {
       id: '4',
-      name: '최수연',
+      name: '오사남',
       role: '영업팀',
       lunchTime: '12:00-13:00',
       interests: ['샐러드/건강식', '한정식', '건강식'],
+      avatar: '👨‍🔧',
+      status: 'available'
+    },
+    {
+      id: '5',
+      name: '오일녀',
+      role: '기획팀',
+      lunchTime: '12:15-13:15',
+      interests: ['베트남음식', '샌드위치', '디저트'],
       avatar: '👩‍💼',
+      status: 'available'
+    },
+    {
+      id: '6',
+      name: '오이녀',
+      role: '인사팀',
+      lunchTime: '11:45-12:45',
+      interests: ['중식', '분식', '커피'],
+      avatar: '👩‍💻',
+      status: 'available'
+    },
+    {
+      id: '7',
+      name: '오삼녀',
+      role: '재무팀',
+      lunchTime: '12:45-13:45',
+      interests: ['양식', '샐러드/건강식', '주스'],
+      avatar: '👩‍🎨',
+      status: 'available'
+    },
+    {
+      id: '8',
+      name: '오사녀',
+      role: '고객지원팀',
+      lunchTime: '12:30-13:30',
+      interests: ['한식', '국밥', '차'],
+      avatar: '👩‍🔧',
       status: 'available'
     }
   ];
