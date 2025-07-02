@@ -125,24 +125,31 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   };
 
   const selectUser = (user: User, checked: boolean) => {
+    console.log('selectUser 호출:', user.name, checked, '현재 선택된 수:', matchedUsers.length, '최대:', maxGroupSize);
+    
     if (checked) {
       // 체크박스가 체크된 경우 사용자 추가
       if (matchedUsers.length < maxGroupSize) {
         const newMatchedUsers = [...matchedUsers, user];
+        console.log('사용자 추가:', newMatchedUsers.map(u => u.name));
         setMatchedUsers(newMatchedUsers);
         setMatchingStatus('matched');
       } else {
         // 그룹 크기 초과 시 알림
+        console.log('그룹 크기 초과');
         alert(`최대 ${maxGroupSize}명까지만 선택할 수 있습니다.`);
+        return false; // 체크박스 상태를 되돌리기 위해 false 반환
       }
     } else {
       // 체크박스가 해제된 경우 사용자 제거
       const newMatchedUsers = matchedUsers.filter(u => u.id !== user.id);
+      console.log('사용자 제거:', newMatchedUsers.map(u => u.name));
       setMatchedUsers(newMatchedUsers);
       if (newMatchedUsers.length === 0) {
         setMatchingStatus('idle');
       }
     }
+    return true; // 성공적으로 처리됨
   };
 
   const removeUser = (userId: string) => {
@@ -160,6 +167,11 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   };
 
   const startGroupChat = () => {
+    if (matchedUsers.length === 0) {
+      alert('그룹채팅을 시작하려면 최소 1명 이상의 메이트를 선택해주세요.');
+      return;
+    }
+    console.log('그룹채팅 시작:', matchedUsers.map(u => u.name));
     setShowGroupChat(true);
   };
 
@@ -179,10 +191,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   }
 
   if (showGroupChat) {
+    console.log('그룹채팅 렌더링:', matchedUsers.map(u => u.name));
     return (
       <GroupChat 
         matchedUsers={matchedUsers}
-        onClose={() => setShowGroupChat(false)}
+        onClose={() => {
+          console.log('그룹채팅 닫기');
+          setShowGroupChat(false);
+        }}
       />
     );
   }
@@ -228,9 +244,13 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
               <div className="mt-4">
                 <p className="text-sm font-medium mb-2">그룹 채팅 시작하기:</p>
                 <div className="flex gap-2">
-                  <Button className="flex-1" onClick={startGroupChat}>
+                  <Button 
+                    className="flex-1" 
+                    onClick={startGroupChat}
+                    disabled={matchedUsers.length === 0}
+                  >
                     <MessageCircle className="h-4 w-4 mr-2" />
-                    그룹 채팅 시작
+                    그룹 채팅 시작 ({matchedUsers.length}명)
                   </Button>
                   <Button variant="outline" onClick={cancelMatching}>
                     취소
@@ -350,10 +370,27 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {matchedUsers.map((user) => (
-                          <Badge key={user.id} variant="default" className="text-xs">
+                          <Badge key={user.id} variant="default" className="text-xs flex items-center gap-1">
+                            <span>{user.avatar}</span>
                             {user.name}
+                            <button
+                              onClick={() => removeUser(user.id)}
+                              className="ml-1 hover:bg-primary/20 rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                            >
+                              ×
+                            </button>
                           </Badge>
                         ))}
+                      </div>
+                      <div className="mt-2">
+                        <Button 
+                          size="sm" 
+                          onClick={startGroupChat}
+                          className="w-full"
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" />
+                          그룹 채팅 시작
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -361,15 +398,13 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {availableUsers.map((user) => {
                     const isSelected = matchedUsers.find(u => u.id === user.id);
-                    const isDisabled = !isSelected && matchedUsers.length >= maxGroupSize;
+                    const isDisabled = false; // 체크박스는 항상 활성화
                     return (
                       <div 
                         key={user.id}
                         className={`p-4 border rounded-lg transition-all hover-lift ${
                           isSelected 
                             ? 'border-primary bg-primary/5 shadow-md' 
-                            : isDisabled
-                            ? 'border-gray-200 bg-gray-50 opacity-60'
                             : 'hover:border-primary/50 hover:shadow-sm'
                         }`}
                       >
@@ -377,11 +412,22 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                           <Checkbox
                             checked={!!isSelected}
                             onCheckedChange={(checked) => {
+                              console.log('체크박스 클릭:', user.name, checked);
                               if (typeof checked === 'boolean') {
-                                selectUser(user, checked);
+                                const success = selectUser(user, checked);
+                                if (!success) {
+                                  // 그룹 크기 초과 시 체크박스 상태를 되돌림
+                                  setTimeout(() => {
+                                    const checkbox = document.querySelector(`input[data-user-id="${user.id}"]`) as HTMLInputElement;
+                                    if (checkbox) {
+                                      checkbox.checked = !checked;
+                                    }
+                                  }, 0);
+                                }
                               }
                             }}
-                            disabled={false}
+                            disabled={matchedUsers.length >= maxGroupSize && !isSelected}
+                            data-user-id={user.id}
                           />
                           <Avatar>
                             <AvatarFallback className="text-lg">
@@ -403,9 +449,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                             >
                               {user.status === 'available' ? '가능' : '식사중'}
                             </Badge>
-                            {isDisabled && !isSelected && (
-                              <div className="text-gray-400 text-xs">그룹 가득참</div>
-                            )}
+
                           </div>
                         </div>
                         <div className="mt-3">

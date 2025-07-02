@@ -27,20 +27,26 @@ interface GroupChatProps {
 }
 
 const GroupChat = ({ matchedUsers, onClose }: GroupChatProps) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      userId: 'system',
-      userName: '시스템',
-      userAvatar: '🤖',
-      message: `${matchedUsers.map(u => u.name).join(', ')}님이 그룹 채팅을 시작했습니다!`,
-      timestamp: new Date(),
-      type: 'system'
-    }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 컴포넌트가 마운트될 때 초기 메시지 설정
+  useEffect(() => {
+    if (matchedUsers.length > 0) {
+      const initialMessage: ChatMessage = {
+        id: '1',
+        userId: 'system',
+        userName: '시스템',
+        userAvatar: '🤖',
+        message: `${matchedUsers.map(u => u.name).join(', ')}님이 그룹 채팅을 시작했습니다!`,
+        timestamp: new Date(),
+        type: 'system'
+      };
+      setMessages([initialMessage]);
+    }
+  }, [matchedUsers]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
