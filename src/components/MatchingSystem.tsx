@@ -293,6 +293,20 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                       </Button>
                     </div>
                   </div>
+                  {matchedUsers.length > 0 && (
+                    <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                      <p className="text-sm font-medium text-primary mb-2">
+                        선택된 메이트 ({matchedUsers.length}명)
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {matchedUsers.map((user) => (
+                          <Badge key={user.id} variant="default" className="text-xs">
+                            {user.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {availableUsers.map((user) => {
@@ -300,10 +314,10 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                     return (
                       <div 
                         key={user.id}
-                        className={`p-4 border rounded-lg cursor-pointer transition-colors hover-lift ${
+                        className={`p-4 border rounded-lg cursor-pointer transition-all hover-lift ${
                           isSelected 
-                            ? 'border-primary bg-primary/5' 
-                            : 'hover:border-primary'
+                            ? 'border-primary bg-primary/5 shadow-md' 
+                            : 'hover:border-primary/50 hover:shadow-sm'
                         }`}
                         onClick={() => selectUser(user)}
                       >
@@ -329,7 +343,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                               {user.status === 'available' ? '가능' : '식사중'}
                             </Badge>
                             {isSelected && (
-                              <div className="text-primary text-xs">✓ 선택됨</div>
+                              <div className="text-primary text-xs font-medium">✓ 선택됨</div>
                             )}
                           </div>
                         </div>

@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Bell, Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import UserProfile from './UserProfile';
 
 const Header = () => {
   const [notifications] = useState(3);
+  const [showUserProfile, setShowUserProfile] = useState(false);
 
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
@@ -38,14 +40,24 @@ const Header = () => {
                 </span>
               )}
             </Button>
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary text-white">
-                <User className="h-4 w-4" />
-              </AvatarFallback>
-            </Avatar>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setShowUserProfile(true)}
+              className="p-0"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary text-white">
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+            </Button>
           </div>
         </div>
       </div>
+      {showUserProfile && (
+        <UserProfile onClose={() => setShowUserProfile(false)} />
+      )}
     </header>
   );
 };

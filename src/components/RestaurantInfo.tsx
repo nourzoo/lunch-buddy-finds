@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ interface RestaurantInfoProps {
 }
 
 const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
-  const [waitTimes] = useState([
+  const waitTimes = useMemo(() => [
     { name: '샐러드야', current: 5, peak: 15, status: '원활', lat: 37.5172, lng: 127.0473, rating: 4.5, category: '샐러드/건강식', price: '8,000원대', waitTime: 5 },
     { name: '놀링파스타', current: 12, peak: 25, status: '보통', lat: 37.5180, lng: 127.0480, rating: 4.3, category: '이탈리안', price: '12,000원대', waitTime: 12 },
     { name: '푸근한한식집', current: 0, peak: 5, status: '원활', lat: 37.5165, lng: 127.0465, rating: 4.7, category: '한정식', price: '15,000원대', waitTime: 0 },
@@ -27,7 +27,7 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
     { name: '뿡차이', current: 10, peak: 25, status: '보통', lat: 37.5270, lng: 127.0570, rating: 4.4, category: '중식', price: '14,000원대', waitTime: 10 },
     { name: '카페인절제', current: 4, peak: 12, status: '원활', lat: 37.5280, lng: 127.0580, rating: 4.1, category: '샌드위치', price: '7,000원대', waitTime: 4 },
     { name: '요거트 아이스크림의 교과서', current: 6, peak: 15, status: '보통', lat: 37.5290, lng: 127.0590, rating: 4.5, category: '디저트', price: '6,000원대', waitTime: 6 }
-  ]);
+  ], []);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
 
   // 사용자 위치 가져오기

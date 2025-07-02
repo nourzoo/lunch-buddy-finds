@@ -126,38 +126,95 @@ const GoogleMap = ({ userLocation, restaurants }: GoogleMapProps) => {
   // Google Maps API 로드
   useEffect(() => {
     const loadGoogleMaps = () => {
-      if (window.google) {
+      if (window.google && window.google.maps) {
         initMap();
         return;
       }
 
       // 이미 스크립트가 로드 중인지 확인
       if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+        // 스크립트가 로드 중이면 완료될 때까지 대기
+        const checkGoogleMaps = () => {
+          if (window.google && window.google.maps) {
+            initMap();
+          } else {
+            setTimeout(checkGoogleMaps, 100);
+          }
+        };
+        checkGoogleMaps();
         return;
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=DEMO_KEY&libraries=places&callback=initMap`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=DEMO_KEY&libraries=places`;
       script.async = true;
       script.defer = true;
+      
+      script.onload = () => {
+        if (window.google && window.google.maps) {
+          initMap();
+        }
+      };
       
       script.onerror = () => {
         setMapError('Google Maps API를 불러올 수 없습니다.');
       };
       
-      window.initMap = initMap;
       document.head.appendChild(script);
     };
 
     loadGoogleMaps();
   }, [initMap]);
 
-  // 지도 업데이트
+  // 지도 업데이트 - 마커만 업데이트
   useEffect(() => {
-    if (isMapLoaded && map) {
-      initMap();
-    }
-  }, [userLocation, restaurants, isMapLoaded, map, initMap]);
+    if (!isMapLoaded || !map) return;
+
+    // 기존 마커들 제거
+    markers.forEach(marker => marker.setMap(null));
+
+    // 새로운 마커들 생성
+    const newMarkers = restaurants.map((restaurant) => {
+      const marker = new window.google.maps.Marker({
+        position: { lat: restaurant.lat, lng: restaurant.lng },
+        map: map,
+        title: restaurant.name,
+        icon: {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="16" cy="16" r="12" fill="#FF6B35" stroke="white" stroke-width="2"/>
+              <text x="16" y="20" text-anchor="middle" fill="white" font-size="12" font-weight="bold">🍽️</text>
+            </svg>
+          `),
+          scaledSize: new window.google.maps.Size(32, 32)
+        }
+      });
+
+      // 정보창 생성
+      const infoWindow = new window.google.maps.InfoWindow({
+        content: `
+          <div style="padding: 8px; max-width: 200px;">
+            <h3 style="margin: 0 0 4px 0; font-weight: bold;">${restaurant.name}</h3>
+            <p style="margin: 0 0 4px 0; color: #666;">${restaurant.category}</p>
+            <div style="display: flex; align-items: center; gap: 8px; margin: 4px 0;">
+              <span style="color: #FF6B35;">★ ${restaurant.rating}</span>
+              <span style="color: #666;">대기 ${restaurant.waitTime}분</span>
+            </div>
+            <p style="margin: 4px 0; font-weight: bold; color: #FF6B35;">${restaurant.price}</p>
+          </div>
+        `
+      });
+
+      marker.addListener('click', () => {
+        setSelectedRestaurant(restaurant);
+        infoWindow.open(map, marker);
+      });
+
+      return marker;
+    });
+
+    setMarkers(newMarkers);
+  }, [restaurants, isMapLoaded, map]);
 
   const openNavigation = (restaurant: Restaurant) => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${restaurant.lat},${restaurant.lng}`;
