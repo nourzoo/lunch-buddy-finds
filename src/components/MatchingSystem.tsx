@@ -128,7 +128,8 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
     if (checked) {
       // 체크박스가 체크된 경우 사용자 추가
       if (matchedUsers.length < maxGroupSize) {
-        setMatchedUsers([...matchedUsers, user]);
+        const newMatchedUsers = [...matchedUsers, user];
+        setMatchedUsers(newMatchedUsers);
         setMatchingStatus('matched');
       } else {
         // 그룹 크기 초과 시 알림
@@ -136,16 +137,18 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       }
     } else {
       // 체크박스가 해제된 경우 사용자 제거
-      setMatchedUsers(matchedUsers.filter(u => u.id !== user.id));
-      if (matchedUsers.length <= 1) {
+      const newMatchedUsers = matchedUsers.filter(u => u.id !== user.id);
+      setMatchedUsers(newMatchedUsers);
+      if (newMatchedUsers.length === 0) {
         setMatchingStatus('idle');
       }
     }
   };
 
   const removeUser = (userId: string) => {
-    setMatchedUsers(matchedUsers.filter(u => u.id !== userId));
-    if (matchedUsers.length <= 1) {
+    const newMatchedUsers = matchedUsers.filter(u => u.id !== userId);
+    setMatchedUsers(newMatchedUsers);
+    if (newMatchedUsers.length === 0) {
       setMatchingStatus('idle');
     }
   };
