@@ -263,10 +263,6 @@ const Index = () => {
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">리뷰</span>
             </TabsTrigger>
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span className="hidden sm:inline">프로필</span>
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="recommendation" className="space-y-6">
@@ -307,12 +303,6 @@ const Index = () => {
 
           <TabsContent value="reviews" className="space-y-6">
             <ReviewSystem />
-          </TabsContent>
-
-          <TabsContent value="profile" className="space-y-6">
-            <ProfileEditContext.Provider value={{ isEditing: profileEditing, setIsEditing: setProfileEditing }}>
-              <UserProfile />
-            </ProfileEditContext.Provider>
           </TabsContent>
         </Tabs>
       </main>

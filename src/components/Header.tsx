@@ -3,13 +3,12 @@ import { Bell, Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import UserProfile from './UserProfile';
+import { ProfileEditContext } from './UserProfile';
 
-interface HeaderProps {
-  setTab?: (tab: string) => void;
-}
-
-const Header = ({ setTab }: HeaderProps) => {
+const Header = () => {
   const [notifications] = useState(3);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [profileEditing, setProfileEditing] = useState(false);
 
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
@@ -46,7 +45,7 @@ const Header = ({ setTab }: HeaderProps) => {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => setTab && setTab('profile')}
+              onClick={() => setShowUserProfile(true)}
               className="p-0"
             >
               <Avatar className="h-8 w-8">
@@ -58,6 +57,11 @@ const Header = ({ setTab }: HeaderProps) => {
           </div>
         </div>
       </div>
+      {showUserProfile && (
+        <ProfileEditContext.Provider value={{ isEditing: profileEditing, setIsEditing: setProfileEditing }}>
+          <UserProfile onClose={() => setShowUserProfile(false)} />
+        </ProfileEditContext.Provider>
+      )}
     </header>
   );
 };

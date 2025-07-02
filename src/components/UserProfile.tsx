@@ -78,17 +78,17 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6 relative">
             <h2 className="text-2xl font-bold">마이페이지</h2>
-            {onClose && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={onClose}
-              >
-                나가기
-              </Button>
-            )}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onClose}
+              className="absolute right-0 top-1"
+              aria-label="닫기"
+            >
+              <X className="h-6 w-6" />
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
