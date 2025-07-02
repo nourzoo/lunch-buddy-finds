@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Users, MapPin, Phone, Navigation } from 'lucide-react';
+import GoogleMap from './GoogleMap';
 
 interface RestaurantInfoProps {
   selectedRestaurant?: string;
@@ -10,25 +11,24 @@ interface RestaurantInfoProps {
 
 const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
   const [waitTimes] = useState([
-    { name: '샐러드야', current: 5, peak: 15, status: '원활', lat: 37.5172, lng: 127.0473 },
-    { name: '놀링파스타', current: 12, peak: 25, status: '보통', lat: 37.5180, lng: 127.0480 },
-    { name: '푸근한한식집', current: 0, peak: 5, status: '원활', lat: 37.5165, lng: 127.0465 },
-    { name: '라멘이지예', current: 18, peak: 30, status: '혼잡', lat: 37.5190, lng: 127.0490 },
-    { name: '지글지글', current: 2, peak: 8, status: '원활', lat: 37.5155, lng: 127.0455 },
-    { name: '다도한방카페', current: 8, peak: 20, status: '보통', lat: 37.5178, lng: 127.0478 },
-    { name: '시가집치킨', current: 20, peak: 40, status: '혼잡', lat: 37.5200, lng: 127.0500 },
-    { name: '초밥조바', current: 25, peak: 50, status: '혼잡', lat: 37.5210, lng: 127.0510 },
-    { name: '브라운피자', current: 15, peak: 35, status: '보통', lat: 37.5220, lng: 127.0520 },
-    { name: '뽕커리', current: 7, peak: 18, status: '원활', lat: 37.5230, lng: 127.0530 },
-    { name: '기괴떡볶이', current: 3, peak: 10, status: '원활', lat: 37.5240, lng: 127.0540 },
-    { name: '인백', current: 30, peak: 60, status: '혼잡', lat: 37.5250, lng: 127.0550 },
-    { name: '김밥지옥', current: 1, peak: 5, status: '원활', lat: 37.5260, lng: 127.0560 },
-    { name: '뿡차이', current: 10, peak: 25, status: '보통', lat: 37.5270, lng: 127.0570 },
-    { name: '카페인절제', current: 4, peak: 12, status: '원활', lat: 37.5280, lng: 127.0580 },
-    { name: '요거트 아이스크림의 교과서', current: 6, peak: 15, status: '보통', lat: 37.5290, lng: 127.0590 }
+    { name: '샐러드야', current: 5, peak: 15, status: '원활', lat: 37.5172, lng: 127.0473, rating: 4.5, category: '샐러드/건강식', price: '8,000원대', waitTime: 5 },
+    { name: '놀링파스타', current: 12, peak: 25, status: '보통', lat: 37.5180, lng: 127.0480, rating: 4.3, category: '이탈리안', price: '12,000원대', waitTime: 12 },
+    { name: '푸근한한식집', current: 0, peak: 5, status: '원활', lat: 37.5165, lng: 127.0465, rating: 4.7, category: '한정식', price: '15,000원대', waitTime: 0 },
+    { name: '라멘이지예', current: 18, peak: 30, status: '혼잡', lat: 37.5190, lng: 127.0490, rating: 4.2, category: '일식/라멘', price: '9,000원대', waitTime: 18 },
+    { name: '지글지글', current: 2, peak: 8, status: '원활', lat: 37.5155, lng: 127.0455, rating: 4.0, category: '도시락/간편식', price: '6,000원대', waitTime: 2 },
+    { name: '다도한방카페', current: 8, peak: 20, status: '보통', lat: 37.5178, lng: 127.0478, rating: 4.4, category: '카페', price: '9,000원대', waitTime: 8 },
+    { name: '시가집치킨', current: 20, peak: 40, status: '혼잡', lat: 37.5200, lng: 127.0500, rating: 4.6, category: '치킨/양념치킨', price: '18,000원대', waitTime: 20 },
+    { name: '초밥조바', current: 25, peak: 50, status: '혼잡', lat: 37.5210, lng: 127.0510, rating: 4.8, category: '일식/스시', price: '25,000원대', waitTime: 25 },
+    { name: '브라운피자', current: 15, peak: 35, status: '보통', lat: 37.5220, lng: 127.0520, rating: 4.1, category: '피자', price: '16,000원대', waitTime: 15 },
+    { name: '뽕커리', current: 7, peak: 18, status: '원활', lat: 37.5230, lng: 127.0530, rating: 4.3, category: '베트남음식', price: '11,000원대', waitTime: 7 },
+    { name: '기괴떡볶이', current: 3, peak: 10, status: '원활', lat: 37.5240, lng: 127.0540, rating: 4.0, category: '분식', price: '5,000원대', waitTime: 3 },
+    { name: '인백', current: 30, peak: 60, status: '혼잡', lat: 37.5250, lng: 127.0550, rating: 4.9, category: '양식/스테이크', price: '35,000원대', waitTime: 30 },
+    { name: '김밥지옥', current: 1, peak: 5, status: '원활', lat: 37.5260, lng: 127.0560, rating: 4.2, category: '김밥/도시락', price: '4,000원대', waitTime: 1 },
+    { name: '뿡차이', current: 10, peak: 25, status: '보통', lat: 37.5270, lng: 127.0570, rating: 4.4, category: '중식', price: '14,000원대', waitTime: 10 },
+    { name: '카페인절제', current: 4, peak: 12, status: '원활', lat: 37.5280, lng: 127.0580, rating: 4.1, category: '샌드위치', price: '7,000원대', waitTime: 4 },
+    { name: '요거트 아이스크림의 교과서', current: 6, peak: 15, status: '보통', lat: 37.5290, lng: 127.0590, rating: 4.5, category: '디저트', price: '6,000원대', waitTime: 6 }
   ]);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [showMap, setShowMap] = useState(false);
 
   // 사용자 위치 가져오기
   const getUserLocation = () => {
@@ -40,7 +40,6 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
       (position) => {
         const { latitude, longitude } = position.coords;
         setUserLocation({ lat: latitude, lng: longitude });
-        setShowMap(true);
       },
       (error) => {
         let message = '위치를 가져올 수 없습니다.';
@@ -56,7 +55,6 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
             break;
         }
         alert(message);
-        setShowMap(true);
       }
     );
   };
@@ -162,65 +160,11 @@ const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>📍 주변 맛집 지도</CardTitle>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={getUserLocation}
-            >
-              내 위치 확인
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {showMap ? (
-            <div className="space-y-4">
-              <div className="bg-gray-100 h-64 rounded-lg flex items-center justify-center relative">
-                <div className="text-center text-gray-500">
-                  <MapPin className="h-8 w-8 mx-auto mb-2" />
-                  <p>실제 서비스에서는 지도 API를 연동하여</p>
-                  <p>주변 식당 위치를 표시합니다</p>
-                  {userLocation && (
-                    <div className="mt-4 p-2 bg-blue-50 rounded text-sm">
-                      📍 내 위치: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
-                    </div>
-                  )}
-                </div>
-                {/* 식당 마커들 */}
-                {waitTimes.map((restaurant, index) => (
-                  <div 
-                    key={restaurant.name}
-                    className="absolute bg-red-500 text-white text-xs px-2 py-1 rounded"
-                    style={{
-                      left: `${20 + (index * 15)}%`,
-                      top: `${30 + (index * 10)}%`,
-                      transform: 'translate(-50%, -50%)'
-                    }}
-                  >
-                    {restaurant.name}
-                  </div>
-                ))}
-              </div>
-              <div className="text-sm text-gray-600">
-                <p>• 빨간 점: 주변 식당 위치</p>
-                <p>• 파란 점: 내 현재 위치</p>
-                <p>• 길찾기 버튼을 클릭하면 Google Maps로 이동합니다</p>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gray-100 h-64 rounded-lg flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <MapPin className="h-8 w-8 mx-auto mb-2" />
-                <p>위치 확인 버튼을 눌러서</p>
-                <p>주변 식당 지도를 확인하세요</p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* 구글맵 컴포넌트 */}
+      <GoogleMap 
+        userLocation={userLocation}
+        restaurants={waitTimes}
+      />
     </div>
   );
 };

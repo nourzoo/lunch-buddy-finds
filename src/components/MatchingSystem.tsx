@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Clock, Users, MessageCircle, UserCheck, Shuffle } from 'lucide-react';
+import { Clock, Users, MessageCircle, UserCheck, Shuffle, X } from 'lucide-react';
+import GroupChat from './GroupChat';
 
 interface User {
   id: string;
@@ -26,6 +27,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   const [matchedUsers, setMatchedUsers] = useState<User[]>([]);
   const [matchingStatus, setMatchingStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
   const [maxGroupSize, setMaxGroupSize] = useState(4);
+  const [showGroupChat, setShowGroupChat] = useState(false);
 
   const mockUsers: User[] = [
     {
@@ -134,9 +136,21 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
     }
   };
 
+  const removeUser = (userId: string) => {
+    setMatchedUsers(matchedUsers.filter(u => u.id !== userId));
+    if (matchedUsers.length <= 1) {
+      setMatchingStatus('idle');
+    }
+  };
+
   const cancelMatching = () => {
     setMatchedUsers([]);
     setMatchingStatus('idle');
+    setShowGroupChat(false);
+  };
+
+  const startGroupChat = () => {
+    setShowGroupChat(true);
   };
 
   if (matchingMode === 'solo') {
@@ -151,6 +165,15 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
           </p>
         </CardContent>
       </Card>
+    );
+  }
+
+  if (showGroupChat) {
+    return (
+      <GroupChat 
+        matchedUsers={matchedUsers}
+        onClose={() => setShowGroupChat(false)}
+      />
     );
   }
 
@@ -181,10 +204,13 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                       <span className="text-xs">{user.lunchTime}</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <Button size="sm" className="mb-2">
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      채팅하기
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => removeUser(user.id)}
+                    >
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -192,7 +218,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
               <div className="mt-4">
                 <p className="text-sm font-medium mb-2">그룹 채팅 시작하기:</p>
                 <div className="flex gap-2">
-                  <Button className="flex-1">
+                  <Button className="flex-1" onClick={startGroupChat}>
                     <MessageCircle className="h-4 w-4 mr-2" />
                     그룹 채팅 시작
                   </Button>
@@ -220,7 +246,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                 <Button 
                   onClick={startRandomMatching}
                   disabled={matchingStatus === 'searching'}
-                  className="gradient-orange text-white hover:opacity-90 transition-opacity"
+                  className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:opacity-90 transition-opacity"
                 >
                   {matchingStatus === 'searching' ? (
                     <>
