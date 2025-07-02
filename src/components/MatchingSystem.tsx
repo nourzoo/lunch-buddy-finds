@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Clock, Users, MessageCircle, UserCheck, Shuffle, X } from 'lucide-react';
 import GroupChat from './GroupChat';
 
@@ -26,7 +27,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [matchedUsers, setMatchedUsers] = useState<User[]>([]);
   const [matchingStatus, setMatchingStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
-  const [maxGroupSize, setMaxGroupSize] = useState(1);
+  const [maxGroupSize, setMaxGroupSize] = useState(3);
   const [showGroupChat, setShowGroupChat] = useState(false);
 
   const mockUsers: User[] = [
@@ -123,18 +124,18 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
     }, 2000);
   };
 
-  const selectUser = (user: User) => {
-    if (matchedUsers.find(u => u.id === user.id)) {
-      // 이미 선택된 사용자라면 제거
-      setMatchedUsers(matchedUsers.filter(u => u.id !== user.id));
-      if (matchedUsers.length <= 1) {
-        setMatchingStatus('idle');
-      }
-    } else {
-      // 새로운 사용자 추가 (그룹 크기 제한)
+  const selectUser = (user: User, checked: boolean) => {
+    if (checked) {
+      // 체크박스가 체크된 경우 사용자 추가
       if (matchedUsers.length < maxGroupSize) {
         setMatchedUsers([...matchedUsers, user]);
         setMatchingStatus('matched');
+      }
+    } else {
+      // 체크박스가 해제된 경우 사용자 제거
+      setMatchedUsers(matchedUsers.filter(u => u.id !== user.id));
+      if (matchedUsers.length <= 1) {
+        setMatchingStatus('idle');
       }
     }
   };
@@ -272,7 +273,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
             {(matchingMode === 'select' || matchingMode === 'random') && (
               <div className={matchingMode === 'random' ? 'border-t pt-6' : ''}>
                 {matchingMode === 'random' && <h4 className="font-medium mb-4">또는 직접 선택하기</h4>}
-                {matchingMode === 'select' && <h4 className="font-medium mb-4">점심 메이트 선택</h4>}
+                {matchingMode === 'select' && (
+                  <div className="mb-4">
+                    <h4 className="font-medium mb-2">점심 메이트 선택</h4>
+                    <p className="text-sm text-gray-600">
+                      원하는 그룹 크기를 선택한 후, 함께 점심 먹을 메이트들을 클릭해주세요!
+                    </p>
+                  </div>
+                )}
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <div>
@@ -303,6 +311,32 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                       </Button>
                     </div>
                   </div>
+                  <div className="flex gap-2 mb-3">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setMaxGroupSize(2)}
+                      className={maxGroupSize === 2 ? 'bg-primary text-white' : ''}
+                    >
+                      2명 그룹
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setMaxGroupSize(3)}
+                      className={maxGroupSize === 3 ? 'bg-primary text-white' : ''}
+                    >
+                      3명 그룹
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setMaxGroupSize(4)}
+                      className={maxGroupSize === 4 ? 'bg-primary text-white' : ''}
+                    >
+                      4명 그룹
+                    </Button>
+                  </div>
                   {matchedUsers.length > 0 && (
                     <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
                       <p className="text-sm font-medium text-primary mb-2">
@@ -327,14 +361,22 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                         key={user.id}
                         className={`p-4 border rounded-lg transition-all hover-lift ${
                           isSelected 
-                            ? 'border-primary bg-primary/5 shadow-md cursor-pointer' 
+                            ? 'border-primary bg-primary/5 shadow-md' 
                             : isDisabled
-                            ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
-                            : 'hover:border-primary/50 hover:shadow-sm cursor-pointer'
+                            ? 'border-gray-200 bg-gray-50 opacity-60'
+                            : 'hover:border-primary/50 hover:shadow-sm'
                         }`}
-                        onClick={() => !isDisabled && selectUser(user)}
                       >
                         <div className="flex items-center space-x-3">
+                          <Checkbox
+                            checked={!!isSelected}
+                            onCheckedChange={(checked) => {
+                              if (!isDisabled && typeof checked === 'boolean') {
+                                selectUser(user, checked);
+                              }
+                            }}
+                            disabled={isDisabled}
+                          />
                           <Avatar>
                             <AvatarFallback className="text-lg">
                               {user.avatar}
@@ -355,9 +397,6 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                             >
                               {user.status === 'available' ? '가능' : '식사중'}
                             </Badge>
-                            {isSelected && (
-                              <div className="text-primary text-xs font-medium">✓ 선택됨</div>
-                            )}
                             {isDisabled && !isSelected && (
                               <div className="text-gray-400 text-xs">그룹 가득참</div>
                             )}
