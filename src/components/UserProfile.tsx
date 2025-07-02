@@ -80,11 +80,15 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">마이페이지</h2>
-            {onClose && (
-              <Button variant="ghost" size="icon" onClick={onClose}>
-                <X className="h-5 w-5" />
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onClose} 
+              disabled={!onClose}
+              className={!onClose ? 'opacity-50 cursor-not-allowed' : ''}
+            >
+              나가기
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
