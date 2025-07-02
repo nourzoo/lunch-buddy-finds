@@ -31,7 +31,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       name: '이민수',
       role: '마케팅팀',
       lunchTime: '12:00-13:00',
-      interests: ['이탈리안', '건강식', '카페'],
+      interests: ['이탈리안', '샐러드/건강식', '카페'],
       avatar: '🧑‍💼',
       status: 'available'
     },
@@ -40,7 +40,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       name: '박지영',
       role: '디자인팀',
       lunchTime: '12:30-13:30',
-      interests: ['아시안', '디저트', '트렌디'],
+      interests: ['일식/라멘', '카페', '트렌디'],
       avatar: '👩‍💻',
       status: 'available'
     },
@@ -49,7 +49,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       name: '김철수',
       role: '개발팀',
       lunchTime: '11:30-12:30',
-      interests: ['한식', '간편식', '혼밥'],
+      interests: ['한정식', '도시락/간편식', '혼밥'],
       avatar: '👨‍💻',
       status: 'available'
     },
@@ -58,7 +58,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       name: '최수연',
       role: '영업팀',
       lunchTime: '12:00-13:00',
-      interests: ['건강식', '샐러드', '브런치'],
+      interests: ['샐러드/건강식', '한정식', '건강식'],
       avatar: '👩‍💼',
       status: 'available'
     }

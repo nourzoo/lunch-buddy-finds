@@ -28,9 +28,9 @@ const ReviewSystem = () => {
       userName: '김개발',
       userRole: '백엔드팀',
       rating: 5,
-      comment: '건강한맛집 정말 좋아요! 샐러드가 신선하고 양도 충분해서 든든했습니다. 다이어트 중인 분들께 강추!',
+      comment: '샐러드야 정말 좋아요! 샐러드가 신선하고 양도 충분해서 든든했습니다. 다이어트 중인 분들께 강추!',
       date: '2024-01-15',
-      restaurant: '건강한맛집',
+      restaurant: '샐러드야',
       tags: ['신선함', '건강식', '양많음'],
       likes: 12,
       avatar: '👨‍💻'
@@ -40,9 +40,9 @@ const ReviewSystem = () => {
       userName: '박디자이너',
       userRole: 'UI/UX팀',
       rating: 4,
-      comment: '트렌디파스타 분위기도 좋고 맛도 괜찮았어요. 다만 대기시간이 좀 길어서 시간 여유있을 때 가는게 좋을것 같아요.',
+      comment: '놀링파스타 분위기도 좋고 맛도 괜찮았어요. 다만 대기시간이 좀 길어서 시간 여유있을 때 가는게 좋을것 같아요.',
       date: '2024-01-14',
-      restaurant: '트렌디파스타',
+      restaurant: '놀링파스타',
       tags: ['분위기좋음', '맛있음', '대기시간'],
       likes: 8,
       avatar: '👩‍🎨'
@@ -52,9 +52,9 @@ const ReviewSystem = () => {
       userName: '최팀장',
       userRole: '마케팅팀',
       rating: 5,
-      comment: '한정식온누리는 정말 맛있어요. 영양균형도 잘 맞춰져 있고, 혼밥하기에도 편안한 분위기입니다.',
+      comment: '푸근한한식집은 정말 맛있어요. 영양균형도 잘 맞춰져 있고, 혼밥하기에도 편안한 분위기입니다.',
       date: '2024-01-13',
-      restaurant: '한정식온누리',
+      restaurant: '푸근한한식집',
       tags: ['영양균형', '혼밥추천', '맛집'],
       likes: 15,
       avatar: '👨‍💼'
@@ -155,11 +155,12 @@ const ReviewSystem = () => {
                     onChange={(e) => setNewReview({...newReview, restaurant: e.target.value})}
                   >
                     <option value="">식당을 선택하세요</option>
-                    <option value="건강한맛집">건강한맛집</option>
-                    <option value="트렌디파스타">트렌디파스타</option>
-                    <option value="한정식온누리">한정식온누리</option>
-                    <option value="라멘하우스">라멘하우스</option>
-                    <option value="도시락카페">도시락카페</option>
+                    <option value="샐러드야">샐러드야</option>
+                    <option value="놀링파스타">놀링파스타</option>
+                    <option value="푸근한한식집">푸근한한식집</option>
+                    <option value="라멘이지만예">라멘이지만예</option>
+                    <option value="지글지글">지글지글</option>
+                    <option value="다도한방카페">다도한방카페</option>
                   </select>
                 </div>
 

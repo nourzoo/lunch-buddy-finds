@@ -10,11 +10,11 @@ interface RestaurantInfoProps {
 
 const RestaurantInfo = ({ selectedRestaurant }: RestaurantInfoProps) => {
   const [waitTimes] = useState([
-    { name: '건강한맛집', current: 5, peak: 15, status: '원활' },
-    { name: '트렌디파스타', current: 12, peak: 25, status: '보통' },
-    { name: '한정식온누리', current: 0, peak: 5, status: '원활' },
-    { name: '라멘하우스', current: 18, peak: 30, status: '혼잡' },
-    { name: '도시락카페', current: 2, peak: 8, status: '원활' }
+    { name: '샐러드야', current: 5, peak: 15, status: '원활' },
+    { name: '놀링파스타', current: 12, peak: 25, status: '보통' },
+    { name: '푸근한한식집', current: 0, peak: 5, status: '원활' },
+    { name: '라멘이지만예', current: 18, peak: 30, status: '혼잡' },
+    { name: '지글지글', current: 2, peak: 8, status: '원활' }
   ]);
 
   const getStatusColor = (status: string) => {

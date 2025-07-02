@@ -34,7 +34,7 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
   const mockRestaurants: Restaurant[] = [
     {
       id: '1',
-      name: '건강한맛집',
+      name: '샐러드야',
       category: '샐러드/건강식',
       rating: 4.5,
       walkTime: 3,
@@ -47,7 +47,7 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
     },
     {
       id: '2',
-      name: '트렌디파스타',
+      name: '놀링파스타',
       category: '이탈리안',
       rating: 4.3,
       walkTime: 5,
@@ -60,7 +60,7 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
     },
     {
       id: '3',
-      name: '한정식온누리',
+      name: '푸근한한식집',
       category: '한정식',
       rating: 4.7,
       walkTime: 2,
@@ -73,7 +73,7 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
     },
     {
       id: '4',
-      name: '라멘하우스',
+      name: '라멘이지예',
       category: '일식/라멘',
       rating: 4.2,
       walkTime: 4,
@@ -86,7 +86,7 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
     },
     {
       id: '5',
-      name: '도시락카페',
+      name: '지글지글',
       category: '도시락/간편식',
       rating: 4.0,
       walkTime: 1,
@@ -99,16 +99,16 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
     },
     {
       id: '6',
-      name: '루프탑테라스',
-      category: '카페/브런치',
+      name: '다도한방카페',
+      category: '카페',
       rating: 4.4,
       walkTime: 6,
       waitTime: 8,
-      price: '11,000원대',
-      tags: ['야외석', '뷰맛집', '인스타그램'],
+      price: '9,000원대',
+      tags: ['한방카페', '빙수맛집', '인스타그램'],
       image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400',
       isHealthy: false,
-      description: '좋은 날씨에 야외에서 즐기는 브런치'
+      description: '한옥 냄새 나는 느낌 좋은 카페 빙수가 맛있어요'
     }
   ];
 
