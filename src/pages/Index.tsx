@@ -265,44 +265,54 @@ const Index = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="recommendation" className="space-y-6">
-            <MenuRecommendation preferences={userPreferences} weather={weather} />
+          <TabsContent value="recommendation" className="p-0">
+            <div className="min-h-[600px] flex flex-col">
+              <MenuRecommendation preferences={userPreferences} weather={weather} setTab={setTab} />
+            </div>
           </TabsContent>
 
-          <TabsContent value="matching" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  매칭 방법 선택
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RadioGroup value={matchingMode} onValueChange={handleMatchingModeChange}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="solo" id="solo" />
-                    <Label htmlFor="solo" className="text-sm">혼밥 (조용히 식사)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="select" id="select" />
-                    <Label htmlFor="select" className="text-sm">사람 선택 (직접 고르기)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="random" id="random" />
-                    <Label htmlFor="random" className="text-sm">랜덤 매칭 (자동 매칭)</Label>
-                  </div>
-                </RadioGroup>
-              </CardContent>
-            </Card>
-            <MatchingSystem preferences={userPreferences} matchingMode={matchingMode} />
+          <TabsContent value="matching" className="p-0">
+            <div className="min-h-[600px] flex flex-col gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    매칭 방법 선택
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup value={matchingMode} onValueChange={handleMatchingModeChange}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="solo" id="solo" />
+                      <Label htmlFor="solo" className="text-sm">혼밥 (조용히 식사)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="select" id="select" />
+                      <Label htmlFor="select" className="text-sm">사람 선택 (직접 고르기)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="random" id="random" />
+                      <Label htmlFor="random" className="text-sm">랜덤 매칭 (자동 매칭)</Label>
+                    </div>
+                  </RadioGroup>
+                </CardContent>
+              </Card>
+              <div className="flex-1 flex flex-col">
+                <MatchingSystem preferences={userPreferences} matchingMode={matchingMode} />
+              </div>
+            </div>
           </TabsContent>
 
-          <TabsContent value="realtime" className="space-y-6">
-            <RestaurantInfo />
+          <TabsContent value="realtime" className="p-0">
+            <div className="min-h-[600px] flex flex-col">
+              <RestaurantInfo />
+            </div>
           </TabsContent>
 
-          <TabsContent value="reviews" className="space-y-6">
-            <ReviewSystem />
+          <TabsContent value="reviews" className="p-0">
+            <div className="min-h-[600px] flex flex-col">
+              <ReviewSystem />
+            </div>
           </TabsContent>
         </Tabs>
       </main>

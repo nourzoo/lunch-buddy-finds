@@ -29,6 +29,7 @@ interface MenuRecommendationProps {
     icon: string;
     description?: string;
   };
+  setTab?: (tab: string) => void;
 }
 
 export const mockRestaurants: Restaurant[] = [
@@ -282,7 +283,7 @@ function RestaurantDetailModal({ restaurant, open, onClose }: { restaurant: Rest
   );
 }
 
-const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) => {
+const MenuRecommendation = ({ preferences, weather, setTab }: MenuRecommendationProps) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
@@ -381,7 +382,10 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
       <RestaurantDetailModal 
         restaurant={selectedRestaurant} 
         open={detailOpen} 
-        onClose={() => setDetailOpen(false)} 
+        onClose={() => {
+          setDetailOpen(false);
+          if (setTab) setTab('recommendation');
+        }} 
       />
 
       <Card>
