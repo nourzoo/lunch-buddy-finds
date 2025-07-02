@@ -11,6 +11,8 @@ import MatchingSystem from '@/components/MatchingSystem';
 import RestaurantInfo from '@/components/RestaurantInfo';
 import ReviewSystem from '@/components/ReviewSystem';
 import { User, Utensils, Users, Clock, MessageSquare, CloudSun } from 'lucide-react';
+import { useState as useReactState } from 'react';
+import { ProfileEditContext } from '@/components/UserProfile';
 
 const Index = () => {
   const [userPreferences, setUserPreferences] = useState({
@@ -30,6 +32,8 @@ const Index = () => {
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [tab, setTab] = useState<string>("recommendation");
+  const [profileEditing, setProfileEditing] = useReactState(false);
 
   // 날씨 상태를 한글로 변환하는 함수
   const getWeatherCondition = (weatherCode: number, temperature: number) => {
@@ -178,7 +182,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <Header setTab={setTab} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 text-center">
@@ -239,34 +243,9 @@ const Index = () => {
               </p>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                매칭 방법 선택
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RadioGroup value={matchingMode} onValueChange={handleMatchingModeChange}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="solo" id="solo" />
-                  <Label htmlFor="solo" className="text-sm">혼밥 (조용히 식사)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="select" id="select" />
-                  <Label htmlFor="select" className="text-sm">사람 선택 (직접 고르기)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="random" id="random" />
-                  <Label htmlFor="random" className="text-sm">랜덤 매칭 (자동 매칭)</Label>
-                </div>
-              </RadioGroup>
-            </CardContent>
-          </Card>
         </div>
 
-        <Tabs defaultValue="recommendation" className="space-y-6">
+        <Tabs value={tab} onValueChange={setTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
             <TabsTrigger value="recommendation" className="flex items-center gap-2">
               <Utensils className="h-4 w-4" />
@@ -295,6 +274,30 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="matching" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  매칭 방법 선택
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RadioGroup value={matchingMode} onValueChange={handleMatchingModeChange}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="solo" id="solo" />
+                    <Label htmlFor="solo" className="text-sm">혼밥 (조용히 식사)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="select" id="select" />
+                    <Label htmlFor="select" className="text-sm">사람 선택 (직접 고르기)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="random" id="random" />
+                    <Label htmlFor="random" className="text-sm">랜덤 매칭 (자동 매칭)</Label>
+                  </div>
+                </RadioGroup>
+              </CardContent>
+            </Card>
             <MatchingSystem preferences={userPreferences} matchingMode={matchingMode} />
           </TabsContent>
 
@@ -307,7 +310,9 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
-            <UserProfile onPreferencesChange={setUserPreferences} />
+            <ProfileEditContext.Provider value={{ isEditing: profileEditing, setIsEditing: setProfileEditing }}>
+              <UserProfile />
+            </ProfileEditContext.Provider>
           </TabsContent>
         </Tabs>
       </main>

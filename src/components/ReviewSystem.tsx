@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Star, ThumbsUp, MessageSquare, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { mockRestaurants } from './MenuRecommendation';
 
 interface Review {
   id: string;
@@ -67,6 +67,8 @@ const ReviewSystem = () => {
     comment: '',
     tags: [] as string[]
   });
+
+  const [restaurantFilter, setRestaurantFilter] = useState<string>('');
 
   const [showReviewForm, setShowReviewForm] = useState(false);
   const { toast } = useToast();
@@ -131,13 +133,25 @@ const ReviewSystem = () => {
               <MessageSquare className="h-5 w-5 text-primary" />
               식당 리뷰 ({reviews.length})
             </CardTitle>
-            <Button 
-              onClick={() => setShowReviewForm(!showReviewForm)}
-              size="sm"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              리뷰 작성
-            </Button>
+            <div className="flex gap-2 items-center">
+              <select
+                className="border rounded px-2 py-1 text-sm"
+                value={restaurantFilter}
+                onChange={e => setRestaurantFilter(e.target.value)}
+              >
+                <option value="">전체</option>
+                {mockRestaurants.map(r => (
+                  <option key={r.id} value={r.name}>{r.name}</option>
+                ))}
+              </select>
+              <Button 
+                onClick={() => setShowReviewForm(!showReviewForm)}
+                size="sm"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                리뷰 작성
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -155,12 +169,9 @@ const ReviewSystem = () => {
                     onChange={(e) => setNewReview({...newReview, restaurant: e.target.value})}
                   >
                     <option value="">식당을 선택하세요</option>
-                    <option value="샐러드야">샐러드야</option>
-                    <option value="놀링파스타">놀링파스타</option>
-                    <option value="푸근한한식집">푸근한한식집</option>
-                    <option value="라멘이지만예">라멘이지만예</option>
-                    <option value="지글지글">지글지글</option>
-                    <option value="다도한방카페">다도한방카페</option>
+                    {mockRestaurants.map(r => (
+                      <option key={r.id} value={r.name}>{r.name}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -193,58 +204,60 @@ const ReviewSystem = () => {
           )}
 
           <div className="space-y-4">
-            {reviews.map((review, index) => (
-              <Card key={review.id} className="hover-lift animate-slide-in" style={{ animationDelay: `${index * 0.1}s` }}>
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-3">
-                    <Avatar>
-                      <AvatarFallback className="text-lg">
-                        {review.avatar}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h4 className="font-medium">{review.userName}</h4>
-                          <p className="text-sm text-gray-600">{review.userRole}</p>
-                        </div>
-                        <div className="text-right">
-                          {renderStars(review.rating)}
-                          <p className="text-xs text-gray-500 mt-1">{review.date}</p>
-                        </div>
-                      </div>
+            {reviews
+              .filter(r => !restaurantFilter || r.restaurant === restaurantFilter)
+              .map((review, index) => (
+                <Card key={review.id} className="hover-lift animate-slide-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start space-x-3">
+                      <Avatar>
+                        <AvatarFallback className="text-lg">
+                          {review.avatar}
+                        </AvatarFallback>
+                      </Avatar>
                       
-                      <div className="mb-3">
-                        <Badge variant="outline" className="mb-2">
-                          {review.restaurant}
-                        </Badge>
-                        <p className="text-sm">{review.comment}</p>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-wrap gap-1">
-                          {review.tags.map((tag, i) => (
-                            <Badge key={i} variant="secondary" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-medium">{review.userName}</h4>
+                            <p className="text-sm text-gray-600">{review.userRole}</p>
+                          </div>
+                          <div className="text-right">
+                            {renderStars(review.rating)}
+                            <p className="text-xs text-gray-500 mt-1">{review.date}</p>
+                          </div>
                         </div>
                         
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="text-gray-500 hover:text-primary"
-                        >
-                          <ThumbsUp className="h-4 w-4 mr-1" />
-                          {review.likes}
-                        </Button>
+                        <div className="mb-3">
+                          <Badge variant="outline" className="mb-2">
+                            {review.restaurant}
+                          </Badge>
+                          <p className="text-sm">{review.comment}</p>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-wrap gap-1">
+                            {review.tags.map((tag, i) => (
+                              <Badge key={i} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-gray-500 hover:text-primary"
+                          >
+                            <ThumbsUp className="h-4 w-4 mr-1" />
+                            {review.likes}
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
           </div>
         </CardContent>
       </Card>

@@ -4,9 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import UserProfile from './UserProfile';
 
-const Header = () => {
+interface HeaderProps {
+  setTab?: (tab: string) => void;
+}
+
+const Header = ({ setTab }: HeaderProps) => {
   const [notifications] = useState(3);
-  const [showUserProfile, setShowUserProfile] = useState(false);
 
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
@@ -43,7 +46,7 @@ const Header = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => setShowUserProfile(true)}
+              onClick={() => setTab && setTab('profile')}
               className="p-0"
             >
               <Avatar className="h-8 w-8">
@@ -55,9 +58,6 @@ const Header = () => {
           </div>
         </div>
       </div>
-      {showUserProfile && (
-        <UserProfile onClose={() => setShowUserProfile(false)} />
-      )}
     </header>
   );
 };

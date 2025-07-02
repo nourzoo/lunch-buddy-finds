@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, createContext, useContext } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,11 +23,20 @@ import {
 } from 'lucide-react';
 
 interface UserProfileProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
+// 프로필 편집 모드 Context
+export const ProfileEditContext = createContext<{
+  isEditing: boolean;
+  setIsEditing: (v: boolean) => void;
+}|null>(null);
+
 const UserProfile = ({ onClose }: UserProfileProps) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const context = useContext(ProfileEditContext);
+  const [localEditing, setLocalEditing] = useState(false);
+  const isEditing = context ? context.isEditing : localEditing;
+  const setIsEditing = context ? context.setIsEditing : setLocalEditing;
   const [userData, setUserData] = useState({
     name: '최승연',
     email: 'lunch@company.com',
@@ -71,9 +80,11 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">마이페이지</h2>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-5 w-5" />
-            </Button>
+            {onClose && (
+              <Button variant="ghost" size="icon" onClick={onClose}>
+                <X className="h-5 w-5" />
+              </Button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
