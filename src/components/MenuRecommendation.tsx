@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, Clock, MapPin, RefreshCw, Check, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog } from '@/components/ui/dialog';
+import { useState as useReactState } from 'react';
 
 interface Restaurant {
   id: string;
@@ -240,10 +242,51 @@ export const mockRestaurants: Restaurant[] = [
   }
 ];
 
+// 식당 상세 정보 모달 컴포넌트
+function RestaurantDetailModal({ restaurant, open, onClose }: { restaurant: Restaurant|null, open: boolean, onClose: () => void }) {
+  if (!restaurant) return null;
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 relative">
+          <button className="absolute right-4 top-4 text-gray-400 hover:text-primary" onClick={onClose}>
+            <span className="text-2xl">×</span>
+          </button>
+          <div className="flex gap-4 mb-4">
+            <img src={restaurant.image} alt={restaurant.name} className="w-32 h-32 object-cover rounded-lg" />
+            <div>
+              <h2 className="text-2xl font-bold mb-1">{restaurant.name}</h2>
+              <div className="text-sm text-gray-500 mb-1">{restaurant.category}</div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-semibold text-primary">{restaurant.price}</span>
+                <span className="text-yellow-500">★ {restaurant.rating}</span>
+              </div>
+              <div className="text-xs text-gray-400">도보 {restaurant.walkTime}분 | 대기 {restaurant.waitTime}분</div>
+            </div>
+          </div>
+          <div className="mb-2">
+            <div className="font-semibold mb-1">설명</div>
+            <div className="text-gray-700 text-sm">{restaurant.description}</div>
+          </div>
+          <div className="mb-2">
+            <div className="font-semibold mb-1">대표 메뉴</div>
+            <ul className="list-disc list-inside text-sm text-gray-700">
+              <li>대표메뉴1 - 10,000원</li>
+              <li>대표메뉴2 - 12,000원</li>
+              <li>대표메뉴3 - 9,000원</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </Dialog>
+  );
+}
+
 const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
+  const [detailOpen, setDetailOpen] = useReactState(false);
   const { toast } = useToast();
 
   const getFilteredRestaurants = () => {
@@ -299,17 +342,7 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
 
   const handleSelectRestaurant = (restaurant: Restaurant) => {
     setSelectedRestaurant(restaurant);
-    
-    toast({
-      title: "식당 선택 완료! 🎉",
-      description: `${restaurant.name}을(를) 선택하셨습니다. 맛있는 점심 되세요!`,
-      duration: 3000,
-    });
-
-    // 3초 후 선택 상태 초기화
-    setTimeout(() => {
-      setSelectedRestaurant(null);
-    }, 3000);
+    setDetailOpen(true);
   };
 
   const handleCancelSelection = () => {
@@ -344,46 +377,12 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* 선택된 식당 표시 */}
-      {selectedRestaurant && (
-        <Card className="border-primary bg-primary/5 animate-scale-in">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                  <Check className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">{selectedRestaurant.name}</h3>
-                  <p className="text-sm text-gray-600">{selectedRestaurant.description}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleCancelSelection}
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  취소
-                </Button>
-                <Button 
-                  size="sm"
-                  onClick={() => {
-                    toast({
-                      title: "예약 완료! 📅",
-                      description: `${selectedRestaurant.name} 예약이 완료되었습니다.`,
-                      duration: 3000,
-                    });
-                  }}
-                >
-                  예약하기
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* 식당 상세 정보 모달 */}
+      <RestaurantDetailModal 
+        restaurant={selectedRestaurant} 
+        open={detailOpen} 
+        onClose={() => setDetailOpen(false)} 
+      />
 
       <Card>
         <CardHeader>
@@ -485,16 +484,8 @@ const MenuRecommendation = ({ preferences, weather }: MenuRecommendationProps) =
                         size="sm"
                         variant={isSelected ? "default" : "outline"}
                         onClick={() => handleSelectRestaurant(restaurant)}
-                        disabled={selectedRestaurant && !isSelected}
                       >
-                        {isSelected ? (
-                          <>
-                            <Check className="h-4 w-4 mr-2" />
-                            선택됨
-                          </>
-                        ) : (
-                          '선택하기'
-                        )}
+                        상세 보기
                       </Button>
                     </CardContent>
                   </Card>
