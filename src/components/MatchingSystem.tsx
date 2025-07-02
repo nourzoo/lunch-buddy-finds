@@ -13,6 +13,7 @@ interface User {
   interests: string[];
   avatar: string;
   status: 'available' | 'matched' | 'eating';
+  selected?: boolean;
 }
 
 interface MatchingSystemProps {
@@ -22,8 +23,9 @@ interface MatchingSystemProps {
 
 const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
-  const [matchedUser, setMatchedUser] = useState<User | null>(null);
+  const [matchedUsers, setMatchedUsers] = useState<User[]>([]);
   const [matchingStatus, setMatchingStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
+  const [maxGroupSize, setMaxGroupSize] = useState(4);
 
   const mockUsers: User[] = [
     {
@@ -105,26 +107,35 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       setAvailableUsers(mockUsers);
     } else {
       setAvailableUsers([]);
-      setMatchedUser(null);
+      setMatchedUsers([]);
     }
   }, [matchingMode]);
 
   const startRandomMatching = () => {
     setMatchingStatus('searching');
     setTimeout(() => {
-      const randomUser = availableUsers[Math.floor(Math.random() * availableUsers.length)];
-      setMatchedUser(randomUser);
+      const shuffledUsers = [...availableUsers].sort(() => Math.random() - 0.5);
+      const selectedUsers = shuffledUsers.slice(0, Math.min(maxGroupSize, shuffledUsers.length));
+      setMatchedUsers(selectedUsers);
       setMatchingStatus('matched');
     }, 2000);
   };
 
   const selectUser = (user: User) => {
-    setMatchedUser(user);
-    setMatchingStatus('matched');
+    if (matchedUsers.find(u => u.id === user.id)) {
+      // 이미 선택된 사용자라면 제거
+      setMatchedUsers(matchedUsers.filter(u => u.id !== user.id));
+    } else {
+      // 새로운 사용자 추가 (최대 그룹 크기 제한)
+      if (matchedUsers.length < maxGroupSize) {
+        setMatchedUsers([...matchedUsers, user]);
+        setMatchingStatus('matched');
+      }
+    }
   };
 
   const cancelMatching = () => {
-    setMatchedUser(null);
+    setMatchedUsers([]);
     setMatchingStatus('idle');
   };
 
@@ -145,47 +156,50 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {matchingStatus === 'matched' && matchedUser ? (
+      {matchingStatus === 'matched' && matchedUsers.length > 0 ? (
         <Card className="border-primary animate-scale-in">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-primary">
               <UserCheck className="h-5 w-5" />
-              매칭 완료!
+              매칭 완료! ({matchedUsers.length}명)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center space-x-4 p-4 bg-primary/5 rounded-lg">
-              <Avatar className="h-12 w-12">
-                <AvatarFallback className="text-2xl">
-                  {matchedUser.avatar}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h3 className="font-semibold">{matchedUser.name}</h3>
-                <p className="text-sm text-gray-600">{matchedUser.role}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Clock className="h-3 w-3" />
-                  <span className="text-xs">{matchedUser.lunchTime}</span>
+            <div className="space-y-4">
+              {matchedUsers.map((user) => (
+                <div key={user.id} className="flex items-center space-x-4 p-4 bg-primary/5 rounded-lg">
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback className="text-2xl">
+                      {user.avatar}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{user.name}</h3>
+                    <p className="text-sm text-gray-600">{user.role}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Clock className="h-3 w-3" />
+                      <span className="text-xs">{user.lunchTime}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Button size="sm" className="mb-2">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      채팅하기
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <Button size="sm" className="mb-2">
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  채팅하기
-                </Button>
-                <Button variant="outline" size="sm" onClick={cancelMatching}>
-                  취소
-                </Button>
-              </div>
-            </div>
-            <div className="mt-4">
-              <p className="text-sm font-medium mb-2">공통 관심사:</p>
-              <div className="flex flex-wrap gap-2">
-                {matchedUser.interests.map((interest, i) => (
-                  <Badge key={i} variant="secondary">
-                    {interest}
-                  </Badge>
-                ))}
+              ))}
+              <div className="mt-4">
+                <p className="text-sm font-medium mb-2">그룹 채팅 시작하기:</p>
+                <div className="flex gap-2">
+                  <Button className="flex-1">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    그룹 채팅 시작
+                  </Button>
+                  <Button variant="outline" onClick={cancelMatching}>
+                    취소
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -230,45 +244,81 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
               <div className={matchingMode === 'random' ? 'border-t pt-6' : ''}>
                 {matchingMode === 'random' && <h4 className="font-medium mb-4">또는 직접 선택하기</h4>}
                 {matchingMode === 'select' && <h4 className="font-medium mb-4">점심 메이트 선택</h4>}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-gray-600">그룹 크기: {matchedUsers.length}/{maxGroupSize}</p>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setMaxGroupSize(Math.max(2, maxGroupSize - 1))}
+                        disabled={maxGroupSize <= 2}
+                      >
+                        -
+                      </Button>
+                      <span className="px-2 py-1 text-sm">{maxGroupSize}</span>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setMaxGroupSize(Math.min(8, maxGroupSize + 1))}
+                        disabled={maxGroupSize >= 8}
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {availableUsers.map((user) => (
-                    <div 
-                      key={user.id}
-                      className="p-4 border rounded-lg cursor-pointer hover:border-primary transition-colors hover-lift"
-                      onClick={() => selectUser(user)}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Avatar>
-                          <AvatarFallback className="text-lg">
-                            {user.avatar}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <h5 className="font-medium truncate">{user.name}</h5>
-                          <p className="text-sm text-gray-600">{user.role}</p>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Clock className="h-3 w-3 text-gray-400" />
-                            <span className="text-xs text-gray-500">{user.lunchTime}</span>
+                  {availableUsers.map((user) => {
+                    const isSelected = matchedUsers.find(u => u.id === user.id);
+                    return (
+                      <div 
+                        key={user.id}
+                        className={`p-4 border rounded-lg cursor-pointer transition-colors hover-lift ${
+                          isSelected 
+                            ? 'border-primary bg-primary/5' 
+                            : 'hover:border-primary'
+                        }`}
+                        onClick={() => selectUser(user)}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Avatar>
+                            <AvatarFallback className="text-lg">
+                              {user.avatar}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <h5 className="font-medium truncate">{user.name}</h5>
+                            <p className="text-sm text-gray-600">{user.role}</p>
+                            <div className="flex items-center gap-1 mt-1">
+                              <Clock className="h-3 w-3 text-gray-400" />
+                              <span className="text-xs text-gray-500">{user.lunchTime}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge 
+                              variant={user.status === 'available' ? 'default' : 'secondary'}
+                              className="text-xs mb-1"
+                            >
+                              {user.status === 'available' ? '가능' : '식사중'}
+                            </Badge>
+                            {isSelected && (
+                              <div className="text-primary text-xs">✓ 선택됨</div>
+                            )}
                           </div>
                         </div>
-                        <Badge 
-                          variant={user.status === 'available' ? 'default' : 'secondary'}
-                          className="text-xs"
-                        >
-                          {user.status === 'available' ? '가능' : '식사중'}
-                        </Badge>
-                      </div>
-                      <div className="mt-3">
-                        <div className="flex flex-wrap gap-1">
-                          {user.interests.slice(0, 3).map((interest, i) => (
-                            <Badge key={i} variant="outline" className="text-xs">
-                              {interest}
-                            </Badge>
-                          ))}
+                        <div className="mt-3">
+                          <div className="flex flex-wrap gap-1">
+                            {user.interests.slice(0, 3).map((interest, i) => (
+                              <Badge key={i} variant="outline" className="text-xs">
+                                {interest}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

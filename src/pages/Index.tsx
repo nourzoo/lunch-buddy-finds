@@ -29,6 +29,8 @@ const Index = () => {
     description: '날씨 정보를 가져오는 중입니다.'
   });
   const [weatherLoading, setWeatherLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   // 날씨 상태를 한글로 변환하는 함수
   const getWeatherCondition = (weatherCode: number, temperature: number) => {
@@ -74,13 +76,40 @@ const Index = () => {
     }
   };
 
+  // 사용자 위치 가져오기
+  const getUserLocation = () => {
+    if (!navigator.geolocation) {
+      alert('이 브라우저에서는 위치 서비스를 지원하지 않습니다.');
+      return;
+    }
+
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ lat: latitude, lng: longitude });
+        setLocationLoading(false);
+        // 위치가 업데이트되면 날씨도 새로 가져오기
+        fetchWeather(latitude, longitude);
+      },
+      (error) => {
+        console.error('위치 가져오기 실패:', error);
+        setLocationLoading(false);
+        // 기본 위치로 날씨 가져오기
+        fetchWeather(37.5172, 127.0473);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5분
+      }
+    );
+  };
+
   // Open-Meteo API에서 날씨 데이터 가져오기
-  const fetchWeather = async () => {
+  const fetchWeather = async (latitude: number = 37.5172, longitude: number = 127.0473) => {
     try {
       setWeatherLoading(true);
-      // 서울 좌표 (강남구 기준)
-      const latitude = 37.5172;
-      const longitude = 127.0473;
       
       const response = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=Asia%2FTokyo`
@@ -119,15 +148,21 @@ const Index = () => {
     }
   };
 
-  // 컴포넌트 마운트 시 날씨 데이터 가져오기
+  // 컴포넌트 마운트 시 위치 및 날씨 데이터 가져오기
   useEffect(() => {
-    fetchWeather();
+    getUserLocation();
     
     // 30분마다 날씨 데이터 업데이트
-    const interval = setInterval(fetchWeather, 30 * 60 * 1000);
+    const interval = setInterval(() => {
+      if (userLocation) {
+        fetchWeather(userLocation.lat, userLocation.lng);
+      } else {
+        fetchWeather();
+      }
+    }, 30 * 60 * 1000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [userLocation]);
 
   const handleMatchingModeChange = (mode: 'solo' | 'select' | 'random') => {
     setMatchingMode(mode);
@@ -164,15 +199,26 @@ const Index = () => {
                   <CloudSun className="h-5 w-5 text-primary" />
                   오늘의 날씨
                 </CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={fetchWeather}
-                  disabled={weatherLoading}
-                  className="text-xs"
-                >
-                  {weatherLoading ? '로딩중...' : '새로고침'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={getUserLocation}
+                    disabled={locationLoading}
+                    className="text-xs"
+                  >
+                    {locationLoading ? '위치확인중...' : '📍 내 위치'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => fetchWeather()}
+                    disabled={weatherLoading}
+                    className="text-xs"
+                  >
+                    {weatherLoading ? '로딩중...' : '새로고침'}
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -180,6 +226,11 @@ const Index = () => {
                 <div>
                   <p className="text-2xl font-bold">{weather.temperature}°C</p>
                   <p className="text-gray-600">{weather.condition}</p>
+                  {userLocation && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      📍 현재 위치: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                    </p>
+                  )}
                 </div>
                 <div className="text-4xl">{weather.icon}</div>
               </div>
