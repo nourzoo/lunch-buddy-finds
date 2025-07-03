@@ -1,3 +1,4 @@
+
 import { useState, createContext, useContext } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { 
   User, 
   Mail, 
@@ -21,7 +23,8 @@ import {
   Star,
   MessageCircle,
   Calendar,
-  AlertTriangle
+  AlertTriangle,
+  Users
 } from 'lucide-react';
 
 interface UserProfileProps {
@@ -58,6 +61,7 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
   const [editData, setEditData] = useState(userData);
 
   const commonAllergies = ['갑각류', '견과류', '유제품', '계란', '대두', '밀', '생선', '조개류'];
+  const commonDislikes = ['매운음식', '생선', '내장류', '향신료', '파', '양파', '마늘'];
   const dietTypes = ['아무거나 잘 먹음', '다이어트 중', '단백질 위주', '채식주의자', '건강식 선호'];
 
   const stats = [
@@ -96,6 +100,15 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
       setEditData({...editData, dislikes: [...editData.dislikes, dislike]});
     } else {
       setEditData({...editData, dislikes: editData.dislikes.filter(d => d !== dislike)});
+    }
+  };
+
+  const getMatchingModeText = (mode: string) => {
+    switch (mode) {
+      case 'solo': return '🧘‍♀️ 혼밥';
+      case 'select': return '👥 직접 선택';
+      case 'random': return '🎲 랜덤 매칭';
+      default: return '🎲 랜덤 매칭';
     }
   };
 
@@ -248,6 +261,52 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
                 </CardContent>
               </Card>
 
+              {/* 매칭 방식 설정 */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    매칭 방식 설정
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="font-medium">현재 매칭 방식</p>
+                        <p className="text-sm text-gray-600">홈화면에서 언제든 변경 가능</p>
+                      </div>
+                      <Badge variant="default" className="text-sm">
+                        {getMatchingModeText(userData.matchingMode)}
+                      </Badge>
+                    </div>
+                    
+                    {isEditing && (
+                      <div>
+                        <Label className="text-sm font-medium mb-3 block">매칭 방식 변경</Label>
+                        <RadioGroup 
+                          value={editData.matchingMode} 
+                          onValueChange={(value) => setEditData({...editData, matchingMode: value as any})}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="solo" id="edit-solo" />
+                            <Label htmlFor="edit-solo" className="text-sm">혼밥 (조용히 식사)</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="select" id="edit-select" />
+                            <Label htmlFor="edit-select" className="text-sm">사람 선택 (직접 고르기)</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="random" id="edit-random" />
+                            <Label htmlFor="edit-random" className="text-sm">랜덤 매칭 (자동 매칭)</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* 식단 특성 및 알러지 정보 */}
               <Card>
                 <CardHeader>
@@ -261,21 +320,19 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
                   <div>
                     <Label className="text-sm font-medium mb-3 block">식단 특성</Label>
                     {isEditing ? (
-                      <div className="grid grid-cols-2 gap-2">
-                        {dietTypes.map((type) => (
-                          <div key={type} className="flex items-center space-x-2">
-                            <input
-                              type="radio"
-                              id={`diet-${type}`}
-                              name="dietType"
-                              value={type}
-                              checked={editData.dietType === type}
-                              onChange={(e) => setEditData({...editData, dietType: e.target.value})}
-                            />
-                            <Label htmlFor={`diet-${type}`} className="text-sm">{type}</Label>
-                          </div>
-                        ))}
-                      </div>
+                      <RadioGroup 
+                        value={editData.dietType} 
+                        onValueChange={(value) => setEditData({...editData, dietType: value})}
+                      >
+                        <div className="grid grid-cols-2 gap-2">
+                          {dietTypes.map((type) => (
+                            <div key={type} className="flex items-center space-x-2">
+                              <RadioGroupItem value={type} id={`diet-${type}`} />
+                              <Label htmlFor={`diet-${type}`} className="text-sm">{type}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      </RadioGroup>
                     ) : (
                       <Badge variant="secondary" className="text-sm">{userData.dietType}</Badge>
                     )}
@@ -314,7 +371,7 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
                     {isEditing ? (
                       <div className="space-y-2">
                         <div className="grid grid-cols-2 gap-2">
-                          {['매운음식', '생선', '내장류', '향신료', '파'].map((dislike) => (
+                          {commonDislikes.map((dislike) => (
                             <div key={dislike} className="flex items-center space-x-2">
                               <Checkbox
                                 id={`dislike-${dislike}`}
@@ -334,54 +391,6 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
                           </Badge>
                         )) : <span className="text-gray-500 text-sm">없음</span>}
                       </div>
-                    )}
-                  </div>
-
-                  {/* 현재 매칭 방식 */}
-                  <div>
-                    <Label className="text-sm font-medium mb-3 block">현재 매칭 방식</Label>
-                    {isEditing ? (
-                      <div className="grid grid-cols-3 gap-2">
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            id="matching-solo"
-                            name="matchingMode"
-                            value="solo"
-                            checked={editData.matchingMode === 'solo'}
-                            onChange={(e) => setEditData({...editData, matchingMode: e.target.value as any})}
-                          />
-                          <Label htmlFor="matching-solo" className="text-sm">혼밥</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            id="matching-select"
-                            name="matchingMode"
-                            value="select"
-                            checked={editData.matchingMode === 'select'}
-                            onChange={(e) => setEditData({...editData, matchingMode: e.target.value as any})}
-                          />
-                          <Label htmlFor="matching-select" className="text-sm">직접 선택</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            id="matching-random"
-                            name="matchingMode"
-                            value="random"
-                            checked={editData.matchingMode === 'random'}
-                            onChange={(e) => setEditData({...editData, matchingMode: e.target.value as any})}
-                          />
-                          <Label htmlFor="matching-random" className="text-sm">랜덤 매칭</Label>
-                        </div>
-                      </div>
-                    ) : (
-                      <Badge variant="default" className="text-sm">
-                        {userData.matchingMode === 'solo' ? '🧘‍♀️ 혼밥' : 
-                         userData.matchingMode === 'select' ? '👥 직접 선택' : 
-                         '🎲 랜덤 매칭'}
-                      </Badge>
                     )}
                   </div>
                 </CardContent>

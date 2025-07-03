@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ interface MatchingConditions {
 
 const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]); // 선택된 사용자 ID들
   const [matchedUsers, setMatchedUsers] = useState<User[]>([]);
   const [matchingStatus, setMatchingStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
   const [maxGroupSize, setMaxGroupSize] = useState(3);
@@ -189,8 +191,16 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
     } else {
       setAvailableUsers([]);
       setMatchedUsers([]);
+      setSelectedUsers([]);
     }
   }, [matchingMode]);
+
+  // selectedUsers가 변경될 때마다 matchedUsers 업데이트
+  useEffect(() => {
+    const matched = availableUsers.filter(user => selectedUsers.includes(user.id));
+    setMatchedUsers(matched);
+    setMatchingStatus(matched.length > 0 ? 'matched' : 'idle');
+  }, [selectedUsers, availableUsers]);
 
   const filterUsersByConditions = (users: User[]): User[] => {
     return users.filter(user => {
@@ -223,46 +233,40 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
     setTimeout(() => {
       const filteredUsers = filterUsersByConditions(availableUsers);
       const shuffledUsers = [...filteredUsers].sort(() => Math.random() - 0.5);
-      const selectedUsers = shuffledUsers.slice(0, Math.min(maxGroupSize, shuffledUsers.length));
-      setMatchedUsers(selectedUsers);
+      const selectedUserIds = shuffledUsers.slice(0, Math.min(maxGroupSize, shuffledUsers.length)).map(u => u.id);
+      setSelectedUsers(selectedUserIds);
       setMatchingStatus('matched');
     }, 2000);
   };
 
-  const selectUser = (user: User, checked: boolean) => {
-    console.log('selectUser 호출:', user.name, checked, '현재 선택된 수:', matchedUsers.length, '최대:', maxGroupSize);
+  const handleUserSelect = (userId: string, checked: boolean) => {
+    console.log('handleUserSelect 호출:', userId, checked, '현재 선택된 수:', selectedUsers.length, '최대:', maxGroupSize);
     
     if (checked) {
-      if (matchedUsers.length < maxGroupSize) {
-        const newMatchedUsers = [...matchedUsers, user];
-        console.log('사용자 추가:', newMatchedUsers.map(u => u.name));
-        setMatchedUsers(newMatchedUsers);
-        setMatchingStatus('matched');
+      if (selectedUsers.length < maxGroupSize) {
+        const newSelectedUsers = [...selectedUsers, userId];
+        console.log('사용자 추가:', newSelectedUsers);
+        setSelectedUsers(newSelectedUsers);
       } else {
         console.log('그룹 크기 초과');
         alert(`최대 ${maxGroupSize}명까지만 선택할 수 있습니다.`);
         return false;
       }
     } else {
-      const newMatchedUsers = matchedUsers.filter(u => u.id !== user.id);
-      console.log('사용자 제거:', newMatchedUsers.map(u => u.name));
-      setMatchedUsers(newMatchedUsers);
-      if (newMatchedUsers.length === 0) {
-        setMatchingStatus('idle');
-      }
+      const newSelectedUsers = selectedUsers.filter(id => id !== userId);
+      console.log('사용자 제거:', newSelectedUsers);
+      setSelectedUsers(newSelectedUsers);
     }
     return true;
   };
 
   const removeUser = (userId: string) => {
-    const newMatchedUsers = matchedUsers.filter(u => u.id !== userId);
-    setMatchedUsers(newMatchedUsers);
-    if (newMatchedUsers.length === 0) {
-      setMatchingStatus('idle');
-    }
+    const newSelectedUsers = selectedUsers.filter(id => id !== userId);
+    setSelectedUsers(newSelectedUsers);
   };
 
   const cancelMatching = () => {
+    setSelectedUsers([]);
     setMatchedUsers([]);
     setMatchingStatus('idle');
     setShowGroupChat(false);
@@ -468,7 +472,6 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
               </div>
             )}
 
-            {/* ... keep existing code (직접 선택 모드 UI) */}
             {(matchingMode === 'select' || matchingMode === 'random') && (
               <div className={matchingMode === 'random' ? 'border-t pt-6' : ''}>
                 {matchingMode === 'random' && <h4 className="font-medium mb-4">또는 직접 선택하기</h4>}
@@ -502,8 +505,8 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <div>
-                      <p className="text-sm text-gray-600">그룹 크기: {matchedUsers.length}/{maxGroupSize}</p>
-                      {matchedUsers.length >= maxGroupSize && (
+                      <p className="text-sm text-gray-600">그룹 크기: {selectedUsers.length}/{maxGroupSize}</p>
+                      {selectedUsers.length >= maxGroupSize && (
                         <p className="text-xs text-orange-600 mt-1">
                           최대 그룹 크기에 도달했습니다. 더 선택하려면 그룹 크기를 늘려주세요.
                         </p>
@@ -555,10 +558,10 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                       4명 그룹
                     </Button>
                   </div>
-                  {matchedUsers.length > 0 && (
+                  {selectedUsers.length > 0 && (
                     <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
                       <p className="text-sm font-medium text-primary mb-2">
-                        선택된 메이트 ({matchedUsers.length}명)
+                        선택된 메이트 ({selectedUsers.length}명)
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {matchedUsers.map((user) => (
@@ -590,7 +593,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {filterUsersByConditions(availableUsers).map((user) => {
-                    const isSelected = matchedUsers.find(u => u.id === user.id);
+                    const isSelected = selectedUsers.includes(user.id);
                     return (
                       <div 
                         key={user.id}
@@ -602,23 +605,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                       >
                         <div className="flex items-center space-x-3">
                           <Checkbox
-                            checked={!!isSelected}
+                            checked={isSelected}
                             onCheckedChange={(checked) => {
                               console.log('체크박스 클릭:', user.name, checked);
                               if (typeof checked === 'boolean') {
-                                const success = selectUser(user, checked);
-                                if (!success) {
-                                  setTimeout(() => {
-                                    const checkbox = document.querySelector(`input[data-user-id="${user.id}"]`) as HTMLInputElement;
-                                    if (checkbox) {
-                                      checkbox.checked = !checked;
-                                    }
-                                  }, 0);
-                                }
+                                handleUserSelect(user.id, checked);
                               }
                             }}
-                            disabled={matchedUsers.length >= maxGroupSize && !isSelected}
-                            data-user-id={user.id}
+                            disabled={selectedUsers.length >= maxGroupSize && !isSelected}
                           />
                           <Avatar>
                             <AvatarFallback className="text-lg">

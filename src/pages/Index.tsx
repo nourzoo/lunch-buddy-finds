@@ -4,13 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import Header from '@/components/Header';
 import UserProfile from '@/components/UserProfile';
 import MenuRecommendation from '@/components/MenuRecommendation';
 import MatchingSystem from '@/components/MatchingSystem';
 import RestaurantInfo from '@/components/RestaurantInfo';
 import ReviewSystem from '@/components/ReviewSystem';
-import { User, Utensils, Users, Clock, MessageSquare, CloudSun } from 'lucide-react';
+import UserPosts from '@/components/UserPosts';
+import FriendsList from '@/components/FriendsList';
+import { User, Utensils, Users, Clock, MessageSquare, CloudSun, Edit, MapPin, PenTool, UserPlus } from 'lucide-react';
 import { useState as useReactState } from 'react';
 import { ProfileEditContext } from '@/components/UserProfile';
 
@@ -18,7 +21,7 @@ const Index = () => {
   const [userPreferences, setUserPreferences] = useState({
     healthyOnly: false,
     soloMode: false,
-    location: '강남구 역삼동',
+    location: '서울특별시 강남구 역삼동',
     lunchTime: '12:00-13:00'
   });
 
@@ -32,8 +35,11 @@ const Index = () => {
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [readableAddress, setReadableAddress] = useState('위치 확인 중...');
   const [tab, setTab] = useState<string>("recommendation");
   const [profileEditing, setProfileEditing] = useReactState(false);
+  const [lunchTimeEditing, setLunchTimeEditing] = useState(false);
+  const [tempLunchTime, setTempLunchTime] = useState(userPreferences.lunchTime);
 
   // 날씨 상태를 한글로 변환하는 함수
   const getWeatherCondition = (weatherCode: number, temperature: number) => {
@@ -79,6 +85,27 @@ const Index = () => {
     }
   };
 
+  // Reverse geocoding function
+  const reverseGeocode = async (lat: number, lng: number) => {
+    try {
+      // Using a mock implementation since we don't have access to actual geocoding APIs
+      // In a real implementation, you would use Google Maps Geocoding API or similar
+      const mockAddresses = [
+        '서울특별시 강남구 역삼동',
+        '서울특별시 서초구 서초동',
+        '서울특별시 중구 명동',
+        '서울특별시 종로구 종로',
+        '서울특별시 마포구 홍대입구역'
+      ];
+      const randomAddress = mockAddresses[Math.floor(Math.random() * mockAddresses.length)];
+      setReadableAddress(randomAddress);
+      setUserPreferences(prev => ({ ...prev, location: randomAddress }));
+    } catch (error) {
+      console.error('Reverse geocoding failed:', error);
+      setReadableAddress('주소를 가져올 수 없습니다');
+    }
+  };
+
   // 사용자 위치 가져오기
   const getUserLocation = () => {
     if (!navigator.geolocation) {
@@ -94,12 +121,15 @@ const Index = () => {
         setLocationLoading(false);
         // 위치가 업데이트되면 날씨도 새로 가져오기
         fetchWeather(latitude, longitude);
+        // Reverse geocoding
+        reverseGeocode(latitude, longitude);
       },
       (error) => {
         console.error('위치 가져오기 실패:', error);
         setLocationLoading(false);
         // 기본 위치로 날씨 가져오기
         fetchWeather(37.5172, 127.0473);
+        setReadableAddress('서울특별시 강남구 역삼동');
       },
       {
         enableHighAccuracy: true,
@@ -180,6 +210,16 @@ const Index = () => {
     }
   };
 
+  const handleLunchTimeSave = () => {
+    setUserPreferences(prev => ({ ...prev, lunchTime: tempLunchTime }));
+    setLunchTimeEditing(false);
+  };
+
+  const handleLunchTimeCancel = () => {
+    setTempLunchTime(userPreferences.lunchTime);
+    setLunchTimeEditing(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -194,8 +234,48 @@ const Index = () => {
           </p>
         </div>
 
-        {/* 날씨 및 매칭 방법 선택 */}
+        {/* 점심시간 및 날씨 정보 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* 점심시간 카드 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                오늘 점심시간
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {lunchTimeEditing ? (
+                <div className="space-y-3">
+                  <Input
+                    value={tempLunchTime}
+                    onChange={(e) => setTempLunchTime(e.target.value)}
+                    placeholder="예: 12:00-13:00"
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleLunchTimeSave}>저장</Button>
+                    <Button size="sm" variant="outline" onClick={handleLunchTimeCancel}>취소</Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-primary">{userPreferences.lunchTime}</p>
+                    <p className="text-sm text-gray-600">📍 {readableAddress}</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setLunchTimeEditing(true)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 날씨 카드 */}
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
@@ -230,11 +310,6 @@ const Index = () => {
                 <div>
                   <p className="text-2xl font-bold">{weather.temperature}°C</p>
                   <p className="text-gray-600">{weather.condition}</p>
-                  {userLocation && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      📍 현재 위치: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
-                    </p>
-                  )}
                 </div>
                 <div className="text-4xl">{weather.icon}</div>
               </div>
@@ -246,7 +321,7 @@ const Index = () => {
         </div>
 
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:grid-cols-6">
             <TabsTrigger value="recommendation" className="flex items-center gap-2">
               <Utensils className="h-4 w-4" />
               <span className="hidden sm:inline">추천</span>
@@ -254,6 +329,14 @@ const Index = () => {
             <TabsTrigger value="matching" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">매칭</span>
+            </TabsTrigger>
+            <TabsTrigger value="posts" className="flex items-center gap-2">
+              <PenTool className="h-4 w-4" />
+              <span className="hidden sm:inline">모집</span>
+            </TabsTrigger>
+            <TabsTrigger value="friends" className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4" />
+              <span className="hidden sm:inline">친구</span>
             </TabsTrigger>
             <TabsTrigger value="realtime" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
@@ -300,6 +383,18 @@ const Index = () => {
               <div className="flex-1 flex flex-col">
                 <MatchingSystem preferences={userPreferences} matchingMode={matchingMode} />
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="posts" className="p-0">
+            <div className="min-h-[600px] flex flex-col">
+              <UserPosts />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="friends" className="p-0">
+            <div className="min-h-[600px] flex flex-col">
+              <FriendsList />
             </div>
           </TabsContent>
 
