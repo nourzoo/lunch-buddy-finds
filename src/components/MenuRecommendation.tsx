@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +27,16 @@ interface Restaurant {
   allergyWarning?: string[];
   reason?: string;
 }
+
+export const mockRestaurants = [
+  { id: '1', name: '샐러드야' },
+  { id: '2', name: '놀링파스타' },
+  { id: '3', name: '푸근한한식집' },
+  { id: '4', name: '시원한냉면집' },
+  { id: '5', name: '아이스크림카페' },
+  { id: '6', name: '따뜻한국밥집' },
+  { id: '7', name: '한솥도시락' }
+];
 
 const MenuRecommendation = ({ preferences, weather, setTab }: MenuRecommendationProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('today');
