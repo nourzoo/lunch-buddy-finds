@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   User, 
   Mail, 
@@ -19,7 +20,8 @@ import {
   Heart,
   Star,
   MessageCircle,
-  Calendar
+  Calendar,
+  AlertTriangle
 } from 'lucide-react';
 
 interface UserProfileProps {
@@ -46,10 +48,17 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
     lunchTime: '12:00-13:00',
     interests: ['이탈리안', '샐러드/건강식', '카페'],
     bio: '맛있는 점심을 좋아하는 개발자입니다. 새로운 맛집 탐방을 즐겨요!',
-    location: '강남구 역삼동'
+    location: '강남구 역삼동',
+    allergies: ['갑각류', '견과류'],
+    dislikes: ['매운음식', '생선'],
+    dietType: '다이어트 중',
+    matchingMode: 'random' as 'solo' | 'select' | 'random'
   });
 
   const [editData, setEditData] = useState(userData);
+
+  const commonAllergies = ['갑각류', '견과류', '유제품', '계란', '대두', '밀', '생선', '조개류'];
+  const dietTypes = ['아무거나 잘 먹음', '다이어트 중', '단백질 위주', '채식주의자', '건강식 선호'];
 
   const stats = [
     { label: '매칭 횟수', value: '24', icon: Heart, color: 'text-red-500' },
@@ -74,9 +83,25 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
     setIsEditing(false);
   };
 
+  const handleAllergyToggle = (allergy: string, checked: boolean) => {
+    if (checked) {
+      setEditData({...editData, allergies: [...editData.allergies, allergy]});
+    } else {
+      setEditData({...editData, allergies: editData.allergies.filter(a => a !== allergy)});
+    }
+  };
+
+  const handleDislikeToggle = (dislike: string, checked: boolean) => {
+    if (checked) {
+      setEditData({...editData, dislikes: [...editData.dislikes, dislike]});
+    } else {
+      setEditData({...editData, dislikes: editData.dislikes.filter(d => d !== dislike)});
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6 relative">
             <h2 className="text-2xl font-bold">마이페이지</h2>
@@ -94,6 +119,7 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* 프로필 정보 */}
             <div className="lg:col-span-2 space-y-6">
+              {/* 기본 정보 카드 */}
               <Card>
                 <CardHeader>
                   <div className="flex justify-between items-center">
@@ -112,6 +138,7 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* 기본 정보 */}
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-20 w-20">
                       <AvatarFallback className="text-2xl">
@@ -218,6 +245,145 @@ const UserProfile = ({ onClose }: UserProfileProps) => {
                       </Button>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+
+              {/* 식단 특성 및 알러지 정보 */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-primary" />
+                    식단 특성 및 알러지 정보
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* 식단 특성 */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">식단 특성</Label>
+                    {isEditing ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        {dietTypes.map((type) => (
+                          <div key={type} className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              id={`diet-${type}`}
+                              name="dietType"
+                              value={type}
+                              checked={editData.dietType === type}
+                              onChange={(e) => setEditData({...editData, dietType: e.target.value})}
+                            />
+                            <Label htmlFor={`diet-${type}`} className="text-sm">{type}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <Badge variant="secondary" className="text-sm">{userData.dietType}</Badge>
+                    )}
+                  </div>
+
+                  {/* 알러지 정보 */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">알러지 (못 먹는 식재료)</Label>
+                    {isEditing ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        {commonAllergies.map((allergy) => (
+                          <div key={allergy} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`allergy-${allergy}`}
+                              checked={editData.allergies.includes(allergy)}
+                              onCheckedChange={(checked) => handleAllergyToggle(allergy, !!checked)}
+                            />
+                            <Label htmlFor={`allergy-${allergy}`} className="text-sm">{allergy}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {userData.allergies.length > 0 ? userData.allergies.map((allergy) => (
+                          <Badge key={allergy} variant="destructive" className="text-xs">
+                            ⚠️ {allergy}
+                          </Badge>
+                        )) : <span className="text-gray-500 text-sm">없음</span>}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 기피 식재료 */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">기피 식재료 (싫어하는 음식)</Label>
+                    {isEditing ? (
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          {['매운음식', '생선', '내장류', '향신료', '파'].map((dislike) => (
+                            <div key={dislike} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`dislike-${dislike}`}
+                                checked={editData.dislikes.includes(dislike)}
+                                onCheckedChange={(checked) => handleDislikeToggle(dislike, !!checked)}
+                              />
+                              <Label htmlFor={`dislike-${dislike}`} className="text-sm">{dislike}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {userData.dislikes.length > 0 ? userData.dislikes.map((dislike) => (
+                          <Badge key={dislike} variant="outline" className="text-xs">
+                            🚫 {dislike}
+                          </Badge>
+                        )) : <span className="text-gray-500 text-sm">없음</span>}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 현재 매칭 방식 */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">현재 매칭 방식</Label>
+                    {isEditing ? (
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="matching-solo"
+                            name="matchingMode"
+                            value="solo"
+                            checked={editData.matchingMode === 'solo'}
+                            onChange={(e) => setEditData({...editData, matchingMode: e.target.value as any})}
+                          />
+                          <Label htmlFor="matching-solo" className="text-sm">혼밥</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="matching-select"
+                            name="matchingMode"
+                            value="select"
+                            checked={editData.matchingMode === 'select'}
+                            onChange={(e) => setEditData({...editData, matchingMode: e.target.value as any})}
+                          />
+                          <Label htmlFor="matching-select" className="text-sm">직접 선택</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="matching-random"
+                            name="matchingMode"
+                            value="random"
+                            checked={editData.matchingMode === 'random'}
+                            onChange={(e) => setEditData({...editData, matchingMode: e.target.value as any})}
+                          />
+                          <Label htmlFor="matching-random" className="text-sm">랜덤 매칭</Label>
+                        </div>
+                      </div>
+                    ) : (
+                      <Badge variant="default" className="text-sm">
+                        {userData.matchingMode === 'solo' ? '🧘‍♀️ 혼밥' : 
+                         userData.matchingMode === 'select' ? '👥 직접 선택' : 
+                         '🎲 랜덤 매칭'}
+                      </Badge>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 

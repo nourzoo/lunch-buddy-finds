@@ -1,8 +1,9 @@
+
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, Users, MapPin, Phone, Navigation } from 'lucide-react';
+import { Clock, Users, MapPin, Phone, Navigation, Star, MessageSquare } from 'lucide-react';
 
 interface RestaurantInfoProps {
   selectedRestaurant?: string;
@@ -10,24 +11,104 @@ interface RestaurantInfoProps {
 }
 
 const RestaurantInfo = ({ selectedRestaurant, onClose }: RestaurantInfoProps) => {
+  const [selectedRestaurantForReview, setSelectedRestaurantForReview] = useState<string>('');
+
   const waitTimes = useMemo(() => [
-    { name: '샐러드야', current: 5, peak: 15, status: '원활', lat: 37.5172, lng: 127.0473, rating: 4.5, category: '샐러드/건강식', price: '8,000원대', waitTime: 5 },
-    { name: '놀링파스타', current: 12, peak: 25, status: '보통', lat: 37.5180, lng: 127.0480, rating: 4.3, category: '이탈리안', price: '12,000원대', waitTime: 12 },
-    { name: '푸근한한식집', current: 0, peak: 5, status: '원활', lat: 37.5165, lng: 127.0465, rating: 4.7, category: '한정식', price: '15,000원대', waitTime: 0 },
-    { name: '라멘이지예', current: 18, peak: 30, status: '혼잡', lat: 37.5190, lng: 127.0490, rating: 4.2, category: '일식/라멘', price: '9,000원대', waitTime: 18 },
-    { name: '지글지글', current: 2, peak: 8, status: '원활', lat: 37.5155, lng: 127.0455, rating: 4.0, category: '도시락/간편식', price: '6,000원대', waitTime: 2 },
-    { name: '다도한방카페', current: 8, peak: 20, status: '보통', lat: 37.5178, lng: 127.0478, rating: 4.4, category: '카페', price: '9,000원대', waitTime: 8 },
-    { name: '시가집치킨', current: 20, peak: 40, status: '혼잡', lat: 37.5200, lng: 127.0500, rating: 4.6, category: '치킨/양념치킨', price: '18,000원대', waitTime: 20 },
-    { name: '초밥조바', current: 25, peak: 50, status: '혼잡', lat: 37.5210, lng: 127.0510, rating: 4.8, category: '일식/스시', price: '25,000원대', waitTime: 25 },
-    { name: '브라운피자', current: 15, peak: 35, status: '보통', lat: 37.5220, lng: 127.0520, rating: 4.1, category: '피자', price: '16,000원대', waitTime: 15 },
-    { name: '뽕커리', current: 7, peak: 18, status: '원활', lat: 37.5230, lng: 127.0530, rating: 4.3, category: '베트남음식', price: '11,000원대', waitTime: 7 },
-    { name: '기괴떡볶이', current: 3, peak: 10, status: '원활', lat: 37.5240, lng: 127.0540, rating: 4.0, category: '분식', price: '5,000원대', waitTime: 3 },
-    { name: '인백', current: 30, peak: 60, status: '혼잡', lat: 37.5250, lng: 127.0550, rating: 4.9, category: '양식/스테이크', price: '35,000원대', waitTime: 30 },
-    { name: '김밥지옥', current: 1, peak: 5, status: '원활', lat: 37.5260, lng: 127.0560, rating: 4.2, category: '김밥/도시락', price: '4,000원대', waitTime: 1 },
-    { name: '뿡차이', current: 10, peak: 25, status: '보통', lat: 37.5270, lng: 127.0570, rating: 4.4, category: '중식', price: '14,000원대', waitTime: 10 },
-    { name: '카페인절제', current: 4, peak: 12, status: '원활', lat: 37.5280, lng: 127.0580, rating: 4.1, category: '샌드위치', price: '7,000원대', waitTime: 4 },
-    { name: '요거트 아이스크림의 교과서', current: 6, peak: 15, status: '보통', lat: 37.5290, lng: 127.0590, rating: 4.5, category: '디저트', price: '6,000원대', waitTime: 6 }
+    { 
+      name: '샐러드야', 
+      current: 5, 
+      peak: 15, 
+      status: '원활', 
+      lat: 37.5172, 
+      lng: 127.0473, 
+      rating: 4.5, 
+      category: '샐러드/건강식', 
+      price: '8,000원대', 
+      waitTime: 5,
+      reviewCount: 24,
+      allergyWarnings: ['견과류', '유제품'],
+      mainMenu: '시즌 샐러드'
+    },
+    { 
+      name: '놀링파스타', 
+      current: 12, 
+      peak: 25, 
+      status: '보통', 
+      lat: 37.5180, 
+      lng: 127.0480, 
+      rating: 4.3, 
+      category: '이탈리안', 
+      price: '12,000원대', 
+      waitTime: 12,
+      reviewCount: 18,
+      allergyWarnings: ['밀', '유제품'],
+      mainMenu: '토마토 파스타'
+    },
+    { 
+      name: '푸근한한식집', 
+      current: 0, 
+      peak: 5, 
+      status: '원활', 
+      lat: 37.5165, 
+      lng: 127.0465, 
+      rating: 4.7, 
+      category: '한정식', 
+      price: '15,000원대', 
+      waitTime: 0,
+      reviewCount: 32,
+      allergyWarnings: ['대두'],
+      mainMenu: '한정식 정식'
+    },
+    { 
+      name: '라멘이지예', 
+      current: 18, 
+      peak: 30, 
+      status: '혼잡', 
+      lat: 37.5190, 
+      lng: 127.0490, 
+      rating: 4.2, 
+      category: '일식/라멘', 
+      price: '9,000원대', 
+      waitTime: 18,
+      reviewCount: 27,
+      allergyWarnings: ['계란', '대두'],
+      mainMenu: '돈코츠 라멘'
+    },
+    { 
+      name: '지글지글', 
+      current: 2, 
+      peak: 8, 
+      status: '원활', 
+      lat: 37.5155, 
+      lng: 127.0455, 
+      rating: 4.0, 
+      category: '도시락/간편식', 
+      price: '6,000원대', 
+      waitTime: 2,
+      reviewCount: 15,
+      allergyWarnings: [],
+      mainMenu: '불고기 도시락'
+    },
+    { 
+      name: '다도한방카페', 
+      current: 8, 
+      peak: 20, 
+      status: '보통', 
+      lat: 37.5178, 
+      lng: 127.0478, 
+      rating: 4.4, 
+      category: '카페', 
+      price: '9,000원대', 
+      waitTime: 8,
+      reviewCount: 21,
+      allergyWarnings: ['견과류'],
+      mainMenu: '한방차 세트'
+    }
   ], []);
+
+  // 사용자 알러지 정보 (실제로는 context나 props에서 받아올 예정)
+  const userAllergies = ['갑각류', '견과류'];
+  const userDislikes = ['매운음식', '생선'];
 
   // 네비게이션 열기
   const openNavigation = (lat: number, lng: number) => {
@@ -51,6 +132,18 @@ const RestaurantInfo = ({ selectedRestaurant, onClose }: RestaurantInfoProps) =>
       case '혼잡': return '🔴';
       default: return '⚪';
     }
+  };
+
+  const hasAllergyWarning = (restaurant: any) => {
+    return restaurant.allergyWarnings.some((warning: string) => 
+      userAllergies.includes(warning) || userDislikes.includes(warning)
+    );
+  };
+
+  const getWarningIngredients = (restaurant: any) => {
+    return restaurant.allergyWarnings.filter((warning: string) => 
+      userAllergies.includes(warning) || userDislikes.includes(warning)
+    );
   };
 
   return (
@@ -97,7 +190,26 @@ const RestaurantInfo = ({ selectedRestaurant, onClose }: RestaurantInfoProps) =>
                       <Badge className={getStatusColor(restaurant.status)}>
                         {getStatusIcon(restaurant.status)} {restaurant.status}
                       </Badge>
+                      {/* 리뷰 수 표시 */}
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <MessageSquare className="h-3 w-3" />
+                        <span>{restaurant.reviewCount}</span>
+                      </div>
+                      {/* 평점 표시 */}
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                        <span>{restaurant.rating}</span>
+                      </div>
                     </div>
+                    
+                    {/* 알러지 경고 배지 */}
+                    {hasAllergyWarning(restaurant) && (
+                      <div className="mb-2">
+                        <Badge variant="destructive" className="text-xs">
+                          ⚠️ 주의! 기피 식재료 포함: {getWarningIngredients(restaurant).join(', ')}
+                        </Badge>
+                      </div>
+                    )}
                     
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center gap-2">
@@ -108,6 +220,11 @@ const RestaurantInfo = ({ selectedRestaurant, onClose }: RestaurantInfoProps) =>
                         <Clock className="h-4 w-4 text-gray-500" />
                         <span>피크 시간: <strong>{restaurant.peak}분</strong></span>
                       </div>
+                    </div>
+                    
+                    <div className="mt-2 text-sm text-gray-600">
+                      <p>대표 메뉴: {restaurant.mainMenu}</p>
+                      <p>가격대: {restaurant.price}</p>
                     </div>
                   </div>
                   
@@ -120,15 +237,26 @@ const RestaurantInfo = ({ selectedRestaurant, onClose }: RestaurantInfoProps) =>
                       <Phone className="h-3 w-3" />
                       <span>주문 가능</span>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2 text-xs"
-                      onClick={() => openNavigation(restaurant.lat, restaurant.lng)}
-                    >
-                      <Navigation className="h-3 w-3 mr-1" />
-                      길찾기
-                    </Button>
+                    <div className="flex gap-1 mt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs"
+                        onClick={() => openNavigation(restaurant.lat, restaurant.lng)}
+                      >
+                        <Navigation className="h-3 w-3 mr-1" />
+                        길찾기
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs"
+                        onClick={() => setSelectedRestaurantForReview(restaurant.name)}
+                      >
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        리뷰
+                      </Button>
+                    </div>
                   </div>
                 </div>
 

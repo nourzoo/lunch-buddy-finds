@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Clock, Users, MessageCircle, UserCheck, Shuffle, X } from 'lucide-react';
+import { Clock, Users, MessageCircle, UserCheck, Shuffle, X, Filter, Settings } from 'lucide-react';
 import GroupChat from './GroupChat';
+import MatchingConditionsDialog from './MatchingConditionsDialog';
 
 interface User {
   id: string;
@@ -16,11 +17,25 @@ interface User {
   avatar: string;
   status: 'available' | 'matched' | 'eating';
   selected?: boolean;
+  ageGroup: string;
+  gender: string;
+  location: string;
+  eatingStyle: string;
+  allergies: string[];
+  dislikes: string[];
+  dietType: string;
 }
 
 interface MatchingSystemProps {
   preferences: any;
   matchingMode: 'solo' | 'select' | 'random';
+}
+
+interface MatchingConditions {
+  ageGroups: string[];
+  gender: string;
+  location: string[];
+  eatingStyle: string[];
 }
 
 const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
@@ -29,6 +44,13 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   const [matchingStatus, setMatchingStatus] = useState<'idle' | 'searching' | 'matched'>('idle');
   const [maxGroupSize, setMaxGroupSize] = useState(3);
   const [showGroupChat, setShowGroupChat] = useState(false);
+  const [showConditionsDialog, setShowConditionsDialog] = useState(false);
+  const [matchingConditions, setMatchingConditions] = useState<MatchingConditions>({
+    ageGroups: [],
+    gender: '상관없음',
+    location: [],
+    eatingStyle: []
+  });
 
   const mockUsers: User[] = [
     {
@@ -38,7 +60,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       lunchTime: '12:00-13:00',
       interests: ['이탈리안', '샐러드/건강식', '카페'],
       avatar: '👨‍💻',
-      status: 'available'
+      status: 'available',
+      ageGroup: '20대',
+      gender: '남성',
+      location: '강남 근처',
+      eatingStyle: '조용한 식사 선호',
+      allergies: ['견과류'],
+      dislikes: ['매운음식'],
+      dietType: '건강식 선호'
     },
     {
       id: '2',
@@ -47,7 +76,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       lunchTime: '12:30-13:30',
       interests: ['일식/라멘', '카페', '트렌디'],
       avatar: '👨‍🎨',
-      status: 'available'
+      status: 'available',
+      ageGroup: '30대',
+      gender: '남성',
+      location: '내 위치 반경 3km',
+      eatingStyle: '말 많은 사람',
+      allergies: [],
+      dislikes: ['생선'],
+      dietType: '아무거나 잘 먹음'
     },
     {
       id: '3',
@@ -56,7 +92,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       lunchTime: '11:30-12:30',
       interests: ['한정식', '도시락/간편식', '혼밥'],
       avatar: '👨‍💼',
-      status: 'available'
+      status: 'available',
+      ageGroup: '40대 이상',
+      gender: '남성',
+      location: '같은 건물',
+      eatingStyle: '빠른 식사 선호',
+      allergies: ['갑각류'],
+      dislikes: [],
+      dietType: '단백질 위주'
     },
     {
       id: '4',
@@ -65,7 +108,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       lunchTime: '12:00-13:00',
       interests: ['샐러드/건강식', '한정식', '건강식'],
       avatar: '👨‍🔧',
-      status: 'available'
+      status: 'available',
+      ageGroup: '30대',
+      gender: '남성',
+      location: '도보 10분 이내',
+      eatingStyle: '맛집 탐방 좋아함',
+      allergies: [],
+      dislikes: ['매운음식'],
+      dietType: '다이어트 중'
     },
     {
       id: '5',
@@ -74,7 +124,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       lunchTime: '12:15-13:15',
       interests: ['베트남음식', '샌드위치', '디저트'],
       avatar: '👩‍💼',
-      status: 'available'
+      status: 'available',
+      ageGroup: '20대',
+      gender: '여성',
+      location: '강남 근처',
+      eatingStyle: '말 많은 사람',
+      allergies: ['유제품'],
+      dislikes: ['내장류'],
+      dietType: '채식주의자'
     },
     {
       id: '6',
@@ -83,7 +140,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       lunchTime: '11:45-12:45',
       interests: ['중식', '분식', '커피'],
       avatar: '👩‍💻',
-      status: 'available'
+      status: 'available',
+      ageGroup: '30대',
+      gender: '여성',
+      location: '내 위치 반경 3km',
+      eatingStyle: '조용한 식사 선호',
+      allergies: [],
+      dislikes: ['향신료'],
+      dietType: '아무거나 잘 먹음'
     },
     {
       id: '7',
@@ -92,7 +156,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       lunchTime: '12:45-13:45',
       interests: ['양식', '샐러드/건강식', '주스'],
       avatar: '👩‍🎨',
-      status: 'available'
+      status: 'available',
+      ageGroup: '20대',
+      gender: '여성',
+      location: '같은 건물',
+      eatingStyle: '맛집 탐방 좋아함',
+      allergies: ['계란'],
+      dislikes: [],
+      dietType: '건강식 선호'
     },
     {
       id: '8',
@@ -101,7 +172,14 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       lunchTime: '12:30-13:30',
       interests: ['한식', '국밥', '차'],
       avatar: '👩‍🔧',
-      status: 'available'
+      status: 'available',
+      ageGroup: '40대 이상',
+      gender: '여성',
+      location: '도보 10분 이내',
+      eatingStyle: '빠른 식사 선호',
+      allergies: ['대두'],
+      dislikes: ['파'],
+      dietType: '단백질 위주'
     }
   ];
 
@@ -114,10 +192,37 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
     }
   }, [matchingMode]);
 
+  const filterUsersByConditions = (users: User[]): User[] => {
+    return users.filter(user => {
+      // 나이대 필터
+      if (matchingConditions.ageGroups.length > 0 && !matchingConditions.ageGroups.includes(user.ageGroup)) {
+        return false;
+      }
+      
+      // 성별 필터
+      if (matchingConditions.gender !== '상관없음' && user.gender !== matchingConditions.gender) {
+        return false;
+      }
+      
+      // 위치 필터
+      if (matchingConditions.location.length > 0 && !matchingConditions.location.includes(user.location)) {
+        return false;
+      }
+      
+      // 식사 스타일 필터
+      if (matchingConditions.eatingStyle.length > 0 && !matchingConditions.eatingStyle.includes(user.eatingStyle)) {
+        return false;
+      }
+      
+      return true;
+    });
+  };
+
   const startRandomMatching = () => {
     setMatchingStatus('searching');
     setTimeout(() => {
-      const shuffledUsers = [...availableUsers].sort(() => Math.random() - 0.5);
+      const filteredUsers = filterUsersByConditions(availableUsers);
+      const shuffledUsers = [...filteredUsers].sort(() => Math.random() - 0.5);
       const selectedUsers = shuffledUsers.slice(0, Math.min(maxGroupSize, shuffledUsers.length));
       setMatchedUsers(selectedUsers);
       setMatchingStatus('matched');
@@ -128,20 +233,17 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
     console.log('selectUser 호출:', user.name, checked, '현재 선택된 수:', matchedUsers.length, '최대:', maxGroupSize);
     
     if (checked) {
-      // 체크박스가 체크된 경우 사용자 추가
       if (matchedUsers.length < maxGroupSize) {
         const newMatchedUsers = [...matchedUsers, user];
         console.log('사용자 추가:', newMatchedUsers.map(u => u.name));
         setMatchedUsers(newMatchedUsers);
         setMatchingStatus('matched');
       } else {
-        // 그룹 크기 초과 시 알림
         console.log('그룹 크기 초과');
         alert(`최대 ${maxGroupSize}명까지만 선택할 수 있습니다.`);
-        return false; // 체크박스 상태를 되돌리기 위해 false 반환
+        return false;
       }
     } else {
-      // 체크박스가 해제된 경우 사용자 제거
       const newMatchedUsers = matchedUsers.filter(u => u.id !== user.id);
       console.log('사용자 제거:', newMatchedUsers.map(u => u.name));
       setMatchedUsers(newMatchedUsers);
@@ -149,7 +251,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
         setMatchingStatus('idle');
       }
     }
-    return true; // 성공적으로 처리됨
+    return true;
   };
 
   const removeUser = (userId: string) => {
@@ -173,6 +275,19 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
     }
     console.log('그룹채팅 시작:', matchedUsers.map(u => u.name));
     setShowGroupChat(true);
+  };
+
+  const handleConditionsApply = (conditions: MatchingConditions) => {
+    setMatchingConditions(conditions);
+  };
+
+  const getActiveConditionsCount = () => {
+    let count = 0;
+    if (matchingConditions.ageGroups.length > 0) count++;
+    if (matchingConditions.gender !== '상관없음') count++;
+    if (matchingConditions.location.length > 0) count++;
+    if (matchingConditions.eatingStyle.length > 0) count++;
+    return count;
   };
 
   if (matchingMode === 'solo') {
@@ -229,6 +344,24 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                       <Clock className="h-3 w-3" />
                       <span className="text-xs">{user.lunchTime}</span>
                     </div>
+                    {/* 상대방 알러지 정보 표시 */}
+                    {user.allergies.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs text-red-600 font-medium">
+                          ⚠️ {user.name}님은 {user.allergies.join(', ')}을(를) 못 먹어요
+                        </p>
+                      </div>
+                    )}
+                    {user.dislikes.length > 0 && (
+                      <div className="mt-1">
+                        <p className="text-xs text-orange-600">
+                          🚫 기피: {user.dislikes.join(', ')}
+                        </p>
+                      </div>
+                    )}
+                    <Badge variant="outline" className="text-xs mt-1">
+                      {user.dietType}
+                    </Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button 
@@ -273,40 +406,99 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
           <CardContent>
             {matchingMode === 'random' && (
               <div className="text-center mb-6">
-                <Button 
-                  onClick={startRandomMatching}
-                  disabled={matchingStatus === 'searching'}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:opacity-90 transition-opacity"
-                >
-                  {matchingStatus === 'searching' ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      매칭 중...
-                    </>
-                  ) : (
-                    <>
-                      <Shuffle className="h-4 w-4 mr-2" />
-                      랜덤 매칭 시작
-                    </>
-                  )}
-                </Button>
-                <p className="text-sm text-gray-500 mt-2">
-                  비슷한 점심시간을 가진 동료와 자동 매칭
+                <div className="flex justify-center gap-3 mb-4">
+                  <Button 
+                    onClick={startRandomMatching}
+                    disabled={matchingStatus === 'searching'}
+                    className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:opacity-90 transition-opacity"
+                  >
+                    {matchingStatus === 'searching' ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        매칭 중...
+                      </>
+                    ) : (
+                      <>
+                        <Shuffle className="h-4 w-4 mr-2" />
+                        랜덤 매칭 시작
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setShowConditionsDialog(true)}
+                    className="relative"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    조건 설정
+                    {getActiveConditionsCount() > 0 && (
+                      <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
+                        {getActiveConditionsCount()}
+                      </Badge>
+                    )}
+                  </Button>
+                </div>
+                
+                {getActiveConditionsCount() > 0 && (
+                  <div className="p-3 bg-blue-50 rounded-lg mb-4">
+                    <p className="text-sm font-medium text-blue-800 mb-2">활성 조건:</p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {matchingConditions.ageGroups.map(age => (
+                        <Badge key={age} variant="outline" className="text-xs">{age}</Badge>
+                      ))}
+                      {matchingConditions.gender !== '상관없음' && (
+                        <Badge variant="outline" className="text-xs">{matchingConditions.gender}</Badge>
+                      )}
+                      {matchingConditions.location.map(loc => (
+                        <Badge key={loc} variant="outline" className="text-xs">{loc}</Badge>
+                      ))}
+                      {matchingConditions.eatingStyle.map(style => (
+                        <Badge key={style} variant="outline" className="text-xs">{style}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <p className="text-sm text-gray-500">
+                  {getActiveConditionsCount() > 0 
+                    ? '설정된 조건에 맞는 동료와 자동 매칭'
+                    : '비슷한 점심시간을 가진 동료와 자동 매칭'
+                  }
                 </p>
               </div>
             )}
 
+            {/* ... keep existing code (직접 선택 모드 UI) */}
             {(matchingMode === 'select' || matchingMode === 'random') && (
               <div className={matchingMode === 'random' ? 'border-t pt-6' : ''}>
                 {matchingMode === 'random' && <h4 className="font-medium mb-4">또는 직접 선택하기</h4>}
                 {matchingMode === 'select' && (
                   <div className="mb-4">
-                    <h4 className="font-medium mb-2">점심 메이트 선택</h4>
-                    <p className="text-sm text-gray-600">
-                      원하는 그룹 크기를 선택한 후, 함께 점심 먹을 메이트들을 클릭해주세요!
-                    </p>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="font-medium mb-2">점심 메이트 선택</h4>
+                        <p className="text-sm text-gray-600">
+                          원하는 그룹 크기를 선택한 후, 함께 점심 먹을 메이트들을 클릭해주세요!
+                        </p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowConditionsDialog(true)}
+                        className="relative"
+                      >
+                        <Filter className="h-4 w-4 mr-1" />
+                        필터
+                        {getActiveConditionsCount() > 0 && (
+                          <Badge className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 text-xs">
+                            {getActiveConditionsCount()}
+                          </Badge>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 )}
+                
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <div>
@@ -395,10 +587,10 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                     </div>
                   )}
                 </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {availableUsers.map((user) => {
+                  {filterUsersByConditions(availableUsers).map((user) => {
                     const isSelected = matchedUsers.find(u => u.id === user.id);
-                    const isDisabled = false; // 체크박스는 항상 활성화
                     return (
                       <div 
                         key={user.id}
@@ -416,7 +608,6 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                               if (typeof checked === 'boolean') {
                                 const success = selectUser(user, checked);
                                 if (!success) {
-                                  // 그룹 크기 초과 시 체크박스 상태를 되돌림
                                   setTimeout(() => {
                                     const checkbox = document.querySelector(`input[data-user-id="${user.id}"]`) as HTMLInputElement;
                                     if (checkbox) {
@@ -441,6 +632,16 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                               <Clock className="h-3 w-3 text-gray-400" />
                               <span className="text-xs text-gray-500">{user.lunchTime}</span>
                             </div>
+                            {/* 알러지 정보 표시 */}
+                            {user.allergies.length > 0 && (
+                              <div className="mt-1">
+                                {user.allergies.map(allergy => (
+                                  <Badge key={allergy} variant="destructive" className="text-xs mr-1">
+                                    ⚠️ {allergy}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                           </div>
                           <div className="text-right">
                             <Badge 
@@ -449,7 +650,9 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                             >
                               {user.status === 'available' ? '가능' : '식사중'}
                             </Badge>
-
+                            <div className="text-xs text-gray-500">
+                              {user.ageGroup} · {user.gender}
+                            </div>
                           </div>
                         </div>
                         <div className="mt-3">
@@ -470,6 +673,13 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
           </CardContent>
         </Card>
       )}
+      
+      <MatchingConditionsDialog
+        isOpen={showConditionsDialog}
+        onClose={() => setShowConditionsDialog(false)}
+        onApply={handleConditionsApply}
+        currentConditions={matchingConditions}
+      />
     </div>
   );
 };
