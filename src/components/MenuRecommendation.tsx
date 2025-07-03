@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Utensils, Star, MapPin, Clock, Users, Thermometer, Lightbulb, TrendingUp, Heart, Salad } from 'lucide-react';
+import React from 'react';
 
 interface MenuRecommendationProps {
   preferences: any;
@@ -40,6 +41,8 @@ export const mockRestaurants = [
 
 const MenuRecommendation = ({ preferences, weather, setTab }: MenuRecommendationProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('today');
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
   
   const categories = [
     { id: 'today', name: '오늘의 추천', icon: Star, description: 'AI가 날씨와 상황을 고려한 맞춤 추천' },
@@ -88,7 +91,7 @@ const MenuRecommendation = ({ preferences, weather, setTab }: MenuRecommendation
       distance: '도보 2분',
       waitTime: '즉시',
       priceRange: '9,000-15,000원',
-      specialMenu: '김치찌개, 된장찌개 정식',
+      specialMenu: '김치찌개, 된장찌게 정식',
       image: '🍲',
       reviewCount: 456,
       tags: ['한식', '든든한', '집밥'],
@@ -170,6 +173,29 @@ const MenuRecommendation = ({ preferences, weather, setTab }: MenuRecommendation
       default: return todayRecommendations;
     }
   };
+
+  const handleRestaurantDetail = (restaurant: Restaurant) => {
+    setSelectedRestaurant(restaurant);
+    setShowDetail(true);
+  };
+
+  const handleBackToList = () => {
+    setShowDetail(false);
+    setSelectedRestaurant(null);
+  };
+
+  // If showing restaurant detail, render RestaurantDetail component
+  if (showDetail) {
+    const RestaurantDetail = React.lazy(() => import('./RestaurantDetail'));
+    return (
+      <React.Suspense fallback={<div>로딩중...</div>}>
+        <RestaurantDetail 
+          restaurant={selectedRestaurant} 
+          onBack={handleBackToList}
+        />
+      </React.Suspense>
+    );
+  }
 
   const currentRecommendations = getRecommendationsByCategory(selectedCategory);
   const selectedCategoryInfo = categories.find(c => c.id === selectedCategory);
@@ -298,7 +324,11 @@ const MenuRecommendation = ({ preferences, weather, setTab }: MenuRecommendation
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button size="sm" className="flex-1">
+                    <Button 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleRestaurantDetail(restaurant)}
+                    >
                       상세보기
                     </Button>
                     <Button 
