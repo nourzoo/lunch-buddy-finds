@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,7 @@ import {
   ThumbsUp,
   AlertTriangle
 } from 'lucide-react';
+import RestaurantReservation from './RestaurantReservation';
 
 interface Restaurant {
   id: string;
@@ -43,7 +43,8 @@ interface RestaurantDetailProps {
 }
 
 const RestaurantDetail = ({ restaurant, onBack }: RestaurantDetailProps) => {
-  const [activeTab, setActiveTab] = useState<'info' | 'menu' | 'reviews'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'menu' | 'reviews' | 'reservation'>('info');
+  const [showReservation, setShowReservation] = useState(false);
 
   if (!restaurant) {
     return (
@@ -134,7 +135,7 @@ const RestaurantDetail = ({ restaurant, onBack }: RestaurantDetailProps) => {
             </div>
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-gray-500" />
-              <span>주문 가능</span>
+              <span>예약 가능</span>
             </div>
           </div>
 
@@ -158,9 +159,34 @@ const RestaurantDetail = ({ restaurant, onBack }: RestaurantDetailProps) => {
               <Navigation className="h-4 w-4 mr-2" />
               길찾기
             </Button>
+            <Button 
+              variant="secondary" 
+              className="flex-1"
+              onClick={() => setShowReservation(true)}
+            >
+              예약하기
+            </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* 예약 모달 */}
+      {showReservation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <RestaurantReservation
+            restaurant={{
+              id: restaurant.id,
+              name: restaurant.name,
+              image: restaurant.image
+            }}
+            onClose={() => setShowReservation(false)}
+            onSuccess={() => {
+              setShowReservation(false);
+              // 예약 성공 후 처리
+            }}
+          />
+        </div>
+      )}
 
       {/* 탭 메뉴 */}
       <Card>

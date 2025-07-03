@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Users, Clock, MapPin, MessageCircle, X, Send } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Users, Clock, MapPin, MessageCircle, X, Send, UserCheck } from 'lucide-react';
 
 interface Post {
   id: string;
@@ -75,6 +75,7 @@ const UserPosts = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [showFriendsOnly, setShowFriendsOnly] = useState(false);
   const [newPost, setNewPost] = useState({
     title: '',
     time: '',
@@ -84,6 +85,14 @@ const UserPosts = () => {
     description: '',
     tags: ''
   });
+
+  // 친구 목록 (실제로는 FriendsList에서 가져와야 함)
+  const friendNames = ['오일남', '오이녀', '오삼남'];
+
+  // 친구 글만 필터링
+  const filteredPosts = showFriendsOnly 
+    ? posts.filter(post => friendNames.includes(post.author))
+    : posts;
 
   const handleCreatePost = () => {
     if (!newPost.title || !newPost.time || !newPost.location || !newPost.menu) {
@@ -378,6 +387,18 @@ const UserPosts = () => {
               새 모집글
             </Button>
           </div>
+          {/* 친구 글만 보기 필터 */}
+          <div className="flex items-center space-x-2 pt-2">
+            <Switch
+              id="friends-only"
+              checked={showFriendsOnly}
+              onCheckedChange={setShowFriendsOnly}
+            />
+            <Label htmlFor="friends-only" className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4" />
+              친구 글만 보기
+            </Label>
+          </div>
         </CardHeader>
         <CardContent>
           <p className="text-gray-600 text-sm">
@@ -387,7 +408,7 @@ const UserPosts = () => {
       </Card>
 
       <div className="space-y-4">
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <Card key={post.id} className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-3">
@@ -396,7 +417,12 @@ const UserPosts = () => {
                     <AvatarFallback>{post.authorAvatar}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="font-semibold">{post.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold">{post.title}</h3>
+                      {friendNames.includes(post.author) && (
+                        <Badge variant="secondary" className="text-xs">친구</Badge>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-600">{post.author} · {post.createdAt}</p>
                   </div>
                 </div>

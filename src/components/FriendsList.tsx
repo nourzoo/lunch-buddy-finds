@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Users, Star, MessageCircle, UserMinus, Search, Send } from 'lucide-react';
+import { UserPlus, Users, Star, MessageCircle, Search, Send, Trash2 } from 'lucide-react';
 
 interface Friend {
   id: string;
@@ -232,7 +231,7 @@ const FriendsList = () => {
                         variant="ghost"
                         onClick={() => handleRemoveFriend(friend.id)}
                       >
-                        <UserMinus className="h-3 w-3" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
