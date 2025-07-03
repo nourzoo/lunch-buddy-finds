@@ -1,14 +1,13 @@
+
 import { useState } from 'react';
 import { Bell, Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import UserProfile from './UserProfile';
-import { ProfileEditContext } from './UserProfile';
 
 const Header = () => {
   const [notifications] = useState(3);
   const [showUserProfile, setShowUserProfile] = useState(false);
-  const [profileEditing, setProfileEditing] = useState(false);
 
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
@@ -58,9 +57,7 @@ const Header = () => {
         </div>
       </div>
       {showUserProfile && (
-        <ProfileEditContext.Provider value={{ isEditing: profileEditing, setIsEditing: setProfileEditing }}>
-          <UserProfile onClose={() => setShowUserProfile(false)} />
-        </ProfileEditContext.Provider>
+        <UserProfile onClose={() => setShowUserProfile(false)} />
       )}
     </header>
   );

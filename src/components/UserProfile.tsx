@@ -21,7 +21,11 @@ import {
   MessageSquare
 } from 'lucide-react';
 
-const UserProfile = () => {
+interface UserProfileProps {
+  onClose?: () => void;
+}
+
+const UserProfile = ({ onClose }: UserProfileProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingIntro, setEditingIntro] = useState(false);
   const [userInfo, setUserInfo] = useState({
@@ -113,12 +117,19 @@ const UserProfile = () => {
               <User className="h-5 w-5 text-primary" />
               내 프로필
             </CardTitle>
-            {!isEditing && (
-              <Button variant="outline" size="sm" onClick={handleEdit}>
-                <Edit className="h-4 w-4 mr-2" />
-                편집
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {!isEditing && (
+                <Button variant="outline" size="sm" onClick={handleEdit}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  편집
+                </Button>
+              )}
+              {onClose && (
+                <Button variant="ghost" size="sm" onClick={onClose}>
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">

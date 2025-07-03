@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -100,14 +99,11 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
       let matched: MatchingUser[] = [];
       
       if (matchingMode === 'solo') {
-        // 혼밥 모드
         setMatchingStep('confirmed');
         return;
       } else if (matchingMode === 'select') {
-        // 사용자가 선택한 사람들
         matched = availableUsers.filter(user => selectedUsers.includes(user.id));
-      } else {
-        // 랜덤 매칭
+      } else if (matchingMode === 'random') {
         const shuffled = [...availableUsers].sort(() => 0.5 - Math.random());
         matched = shuffled.slice(0, Math.floor(Math.random() * 3) + 1);
       }

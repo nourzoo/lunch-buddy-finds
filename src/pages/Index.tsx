@@ -15,7 +15,6 @@ import UserPosts from '@/components/UserPosts';
 import FriendsList from '@/components/FriendsList';
 import { User, Utensils, Users, Clock, MessageSquare, CloudSun, Edit, MapPin, PenTool, UserPlus } from 'lucide-react';
 import { useState as useReactState } from 'react';
-import { ProfileEditContext } from '@/components/UserProfile';
 
 const Index = () => {
   const [userPreferences, setUserPreferences] = useState({
@@ -37,7 +36,6 @@ const Index = () => {
   const [locationLoading, setLocationLoading] = useState(false);
   const [readableAddress, setReadableAddress] = useState('위치 확인 중...');
   const [tab, setTab] = useState<string>("recommendation");
-  const [profileEditing, setProfileEditing] = useReactState(false);
   const [lunchTimeEditing, setLunchTimeEditing] = useState(false);
   const [tempLunchTime, setTempLunchTime] = useState(userPreferences.lunchTime);
 
