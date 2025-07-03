@@ -35,6 +35,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showGroupChat, setShowGroupChat] = useState(false);
   const [matchingStep, setMatchingStep] = useState<'waiting' | 'matched' | 'confirmed'>('waiting');
+  const [randomCount, setRandomCount] = useState(2);
 
   const availableUsers: MatchingUser[] = [
     {
@@ -105,7 +106,7 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
         matched = availableUsers.filter(user => selectedUsers.includes(user.id));
       } else if (matchingMode === 'random') {
         const shuffled = [...availableUsers].sort(() => 0.5 - Math.random());
-        matched = shuffled.slice(0, Math.floor(Math.random() * 3) + 1);
+        matched = shuffled.slice(0, randomCount);
       }
       
       setMatchedUsers(matched);
@@ -223,6 +224,27 @@ const MatchingSystem = ({ preferences, matchingMode }: MatchingSystemProps) => {
                   {matchingMode === 'random' && (
                     <div className="space-y-4 mb-6">
                       <h3 className="font-semibold">매칭 가능한 사람들</h3>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-sm">인원수 선택:</span>
+                        <button
+                          type="button"
+                          className="px-2 py-1 border rounded disabled:opacity-50"
+                          onClick={() => setRandomCount((c) => Math.max(1, c - 1))}
+                          disabled={randomCount <= 1 || isMatching}
+                        >
+                          -
+                        </button>
+                        <span className="font-bold w-6 text-center">{randomCount}</span>
+                        <button
+                          type="button"
+                          className="px-2 py-1 border rounded disabled:opacity-50"
+                          onClick={() => setRandomCount((c) => Math.min(availableUsers.length, c + 1))}
+                          disabled={randomCount >= availableUsers.length || isMatching}
+                        >
+                          +
+                        </button>
+                        <span className="text-xs text-gray-500">(최대 {availableUsers.length}명)</span>
+                      </div>
                       <div className="grid gap-3">
                         {availableUsers.slice(0, 3).map((user) => (
                           <div key={user.id} className="flex items-center space-x-4 p-3 border rounded-lg">
